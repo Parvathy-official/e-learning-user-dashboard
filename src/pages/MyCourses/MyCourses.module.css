@@ -1,0 +1,36 @@
+.page { flex: 1; padding: calc(var(--navbar-height) + 40px) 0 80px; }
+
+.header { margin-bottom: var(--space-8); }
+.title { font-size: 2rem; margin: 0 0 8px; }
+.sub { color: var(--text-secondary); font-size: 1rem; margin: 0; }
+
+.coursesList { display: flex; flex-direction: column; gap: var(--space-4); }
+
+/* Skeleton */
+.loading { display: flex; flex-direction: column; gap: var(--space-4); }
+.skeletonCard {
+  display: flex;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.skeletonThumb {
+  width: 140px;
+  height: 100px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeletonLine {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
