@@ -17,7 +17,7 @@ const courseService = {
     if (USE_MOCK) {
       await delay(600);
       let courses = [...MOCK_COURSES];
-      if (params.category && params.category !== 'All') {
+      if (params.category && params.category !== 'All' && params.category !== 'All Programs') {
         courses = courses.filter((c) => c.category === params.category);
       }
       if (params.search) {

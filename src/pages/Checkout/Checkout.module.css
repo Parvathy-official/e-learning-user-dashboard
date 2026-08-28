@@ -40,13 +40,14 @@
   padding: 14px 20px;
   font-size: 0.9375rem;
   color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border);
 }
 .priceRow:last-child { border-bottom: none; }
 .strikethrough { text-decoration: line-through; color: var(--text-tertiary); }
 .discount { color: var(--success); }
 .total {
-  background: var(--border-light);
+  background: #080D12;
+  border-top: 1px solid var(--border);
   font-weight: 700;
   color: var(--text-dark);
   font-size: 1.125rem;
@@ -58,7 +59,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-2xl);
   padding: var(--space-8);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.95), 0 0 25px rgba(6, 182, 212, 0.1);
   position: sticky;
   top: calc(var(--navbar-height) + 20px);
 }
@@ -66,7 +67,8 @@
 
 .userInfo {
   padding: var(--space-4);
-  background: var(--border-light);
+  background: #080D12;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-5);
 }
@@ -81,6 +83,7 @@
   margin-bottom: var(--space-5);
   padding: var(--space-4) var(--space-5);
   background: var(--primary-bg);
+  border: 1px solid rgba(6, 182, 212, 0.25);
   border-radius: var(--radius-lg);
 }
 .totalLabel { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }

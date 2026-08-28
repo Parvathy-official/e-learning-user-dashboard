@@ -42,7 +42,7 @@ export default function Checkout() {
         description: course?.title,
         order_id: order.order_id,
         prefill: { name: currentUser?.name, email: currentUser?.email },
-        theme: { color: '#6366F1' },
+        theme: { color: '#06B6D4' },
       });
 
       // Step 3: Verify payment with backend

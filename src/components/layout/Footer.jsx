@@ -6,20 +6,20 @@ import { Link } from 'react-router-dom';
 import styles from './Footer.module.css';
 
 const FOOTER_LINKS = {
-  Platform: [
-    { label: 'Courses', to: '/courses' },
-    { label: 'Dashboard', to: '/dashboard' },
-    { label: 'My Courses', to: '/my-courses' },
+  Programs: [
+    { label: 'All Flagship Programs', to: '/courses' },
+    { label: 'Meta & Google Blueprint', to: '/courses/1' },
+    { label: 'E-Com Funnel Masterclass', to: '/courses/2' },
+    { label: 'Student Dashboard', to: '/dashboard' },
   ],
-  Company: [
-    { label: 'About', to: '#' },
-    { label: 'Blog', to: '#' },
-    { label: 'Careers', to: '#' },
-    { label: 'Contact', to: '#' },
+  Resources: [
+    { label: 'ROAS & MER Calculator', to: '/courses/1' },
+    { label: 'Creative Swipe Files', to: '/courses/1' },
+    { label: 'CAPI Tracking SOPs', to: '/courses/1' },
   ],
   Legal: [
     { label: 'Privacy Policy', to: '#' },
-    { label: 'Terms & Conditions', to: '#' },
+    { label: 'Terms of Enrollment', to: '#' },
     { label: 'Refund Policy', to: '#' },
   ],
 };
@@ -31,16 +31,18 @@ export default function Footer() {
         <div className={styles.brand}>
           <Link to="/" className={styles.logo}>
             <div className={styles.logoIcon}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" />
-                <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#030708" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
               </svg>
             </div>
-            <span className={styles.logoText}>LearnFlow</span>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+              <span className={styles.logoText}>LearnFlow</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>Performance</span>
+            </div>
           </Link>
           <p className={styles.tagline}>
-            Learn practical, high-quality skills from industry experts. Advance your career from anywhere.
+            The unfair advantage in paid media buying. Master full-funnel Meta Ads, Google PMax & Funnel CRO to scale profitable 7 and 8-figure brands.
           </p>
           <div className={styles.socials}>
             {/* Twitter/X */}

@@ -24,7 +24,7 @@
   width: 100%;
   height: 44px;
   padding: 0 14px;
-  background: var(--card-bg);
+  background: #080D12;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   font-family: var(--font-sans);
@@ -40,20 +40,21 @@
 
 .input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
+  box-shadow: 0 0 0 3px var(--primary-bg), 0 0 15px rgba(6, 182, 212, 0.2);
 }
 
 .input:disabled {
-  background: var(--border-light);
+  background: rgba(255, 255, 255, 0.02);
   cursor: not-allowed;
   color: var(--text-tertiary);
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
 .hasError .input {
   border-color: var(--error);
 }
 .hasError .input:focus {
-  box-shadow: 0 0 0 3px var(--error-bg);
+  box-shadow: 0 0 0 3px var(--error-bg), 0 0 15px rgba(239, 68, 68, 0.2);
 }
 
 .withLeft {

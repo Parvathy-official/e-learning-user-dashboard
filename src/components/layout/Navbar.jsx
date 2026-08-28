@@ -35,19 +35,21 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className={styles.logo} aria-label="LearnFlow home">
           <div className={styles.logoIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" />
-              <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#030708" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
             </svg>
           </div>
-          <span className={styles.logoText}>LearnFlow</span>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+            <span className={styles.logoText}>LearnFlow</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>Performance</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
         <div className={styles.desktopNav}>
           <NavLink to="/courses" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
-            Courses
+            Programs
           </NavLink>
           {isAuthenticated && (
             <>
@@ -142,7 +144,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className={styles.mobileMenu} role="dialog" aria-label="Mobile navigation">
           <NavLink to="/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
-            Courses
+            Programs
           </NavLink>
           {isAuthenticated ? (
             <>

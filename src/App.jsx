@@ -24,14 +24,16 @@ export default function App() {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '0.875rem',
                 borderRadius: '10px',
-                boxShadow: '0 10px 25px rgba(15,23,42,0.12)',
-                border: '1px solid #E2E8F0',
+                background: '#0B1116',
+                color: '#CBD5E1',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.9)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
               },
               success: {
-                iconTheme: { primary: '#10B981', secondary: '#fff' },
+                iconTheme: { primary: '#10B981', secondary: '#0B1116' },
               },
               error: {
-                iconTheme: { primary: '#EF4444', secondary: '#fff' },
+                iconTheme: { primary: '#EF4444', secondary: '#0B1116' },
               },
             }}
           />

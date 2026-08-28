@@ -18,7 +18,7 @@ const SORT_OPTIONS = [
 export default function Courses() {
   const { courses, coursesLoading, coursesError, fetchCourses } = useCourseContext();
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All');
+  const [category, setCategory] = useState('All Programs');
   const [sort, setSort] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -37,8 +37,8 @@ export default function Courses() {
       {/* Page Header */}
       <div className={styles.pageHeader}>
         <div className="container">
-          <h1 className={styles.heading}>Browse Courses</h1>
-          <p className={styles.sub}>Explore {courses.length}+ courses across all skill levels</p>
+          <h1 className={styles.heading}>Flagship Performance Marketing Programs</h1>
+          <p className={styles.sub}>Master the 2 comprehensive tracks engineered to scale ROAS, media buying & e-commerce funnels.</p>
         </div>
       </div>
 
@@ -55,9 +55,9 @@ export default function Courses() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search courses, topics, instructors…"
+              placeholder="Search modules, Meta/Google ads, creative strategies, CRO…"
               className={styles.searchInput}
-              aria-label="Search courses"
+              aria-label="Search programs"
             />
           </div>
 

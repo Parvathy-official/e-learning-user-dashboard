@@ -68,7 +68,7 @@ export default function CourseDetails() {
           <div className={styles.left}>
             {/* Breadcrumb */}
             <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-              <button onClick={() => navigate('/courses')} className={styles.breadLink}>Courses</button>
+              <button onClick={() => navigate('/courses')} className={styles.breadLink}>Programs</button>
               <span>/</span>
               <span className={styles.breadCurrent}>{course.category}</span>
             </nav>

@@ -39,11 +39,11 @@ export default function Dashboard() {
               Welcome back, {currentUser?.name?.split(' ')[0]} 👋
             </h1>
             <p className={styles.welcomeSub}>
-              You're making great progress! Keep up the momentum.
+              You're mastering high-ROAS media buying & growth engineering.
             </p>
           </div>
           <div className={styles.welcomeProgress}>
-            <p className={styles.progressLabel}>Overall Progress</p>
+            <p className={styles.progressLabel}>Curriculum Progress</p>
             <ProgressBar value={progress} showPercent size="lg" />
           </div>
         </div>
@@ -51,31 +51,31 @@ export default function Dashboard() {
         {/* Stats */}
         <div className={styles.statsGrid}>
           <StatCard
-            icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>}
-            label="Courses Enrolled"
+            icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>}
+            label="Programs Enrolled"
             value={enrollments.length}
-            sub="Total courses purchased"
+            sub="Active masterclasses"
             color="primary"
           />
           <StatCard
             icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>}
             label="In Progress"
             value={inProgress}
-            sub="Active learning sessions"
+            sub="Active learning modules"
             color="warning"
           />
           <StatCard
             icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>}
             label="Completed"
             value={completed}
-            sub="Courses fully completed"
+            sub="Graduated tracks"
             color="success"
           />
           <StatCard
             icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>}
             label="Overall Progress"
             value={`${progress}%`}
-            sub="Across all enrolled courses"
+            sub="Across all masterclasses"
             color="primary"
           />
         </div>
@@ -88,11 +88,11 @@ export default function Dashboard() {
           </div>
 
           {enrollmentsLoading ? (
-            <div className={styles.loadingText}>Loading your courses…</div>
+            <div className={styles.loadingText}>Loading your programs…</div>
           ) : enrolledCourses.length === 0 ? (
             <div className={styles.emptyState}>
-              <p>You haven't enrolled in any courses yet.</p>
-              <Link to="/courses" className={styles.exploreLink}>Explore Courses →</Link>
+              <p>You haven't enrolled in any programs yet.</p>
+              <Link to="/courses" className={styles.exploreLink}>Explore Flagship Programs →</Link>
             </div>
           ) : (
             <div className={styles.coursesList}>

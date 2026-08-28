@@ -96,7 +96,7 @@
   align-self: flex-start;
 }
 .continueBtn:hover {
-  color: var(--primary-dark);
+  color: var(--primary-light);
   gap: 6px;
 }
 

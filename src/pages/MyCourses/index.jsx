@@ -26,15 +26,15 @@ export default function MyCourses() {
     <div className={styles.page}>
       <div className="container">
         <div className={styles.header}>
-          <h1 className={styles.title}>My Courses</h1>
+          <h1 className={styles.title}>My Programs</h1>
           <p className={styles.sub}>
-            {enrolledCourses.length} {enrolledCourses.length === 1 ? 'course' : 'courses'} enrolled
+            {enrolledCourses.length} {enrolledCourses.length === 1 ? 'masterclass' : 'masterclasses'} enrolled
           </p>
         </div>
 
         {enrollmentsLoading ? (
           <div className={styles.loading}>
-            {[1, 2, 3].map((i) => (
+            {[1, 2].map((i) => (
               <div key={i} className={styles.skeletonCard} aria-hidden="true">
                 <div className={styles.skeletonThumb} />
                 <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -53,9 +53,9 @@ export default function MyCourses() {
                 <path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
               </svg>
             }
-            title="No enrolled courses yet"
-            description="You haven't enrolled in any courses yet. Browse our catalog and start learning today!"
-            actionLabel="Explore Courses"
+            title="No enrolled programs yet"
+            description="You haven't enrolled in any flagship masterclasses yet. Explore our performance marketing tracks to scale your media buying."
+            actionLabel="Explore Programs"
             onAction={() => navigate('/courses')}
           />
         ) : (
