@@ -10,6 +10,7 @@ import { MOCK_COURSES, MOCK_RECENT_ACTIVITY } from '../../utils/mockData';
 import StatCard from '../../components/dashboard/StatCard';
 import CourseProgress from '../../components/course/CourseProgress';
 import ProgressBar from '../../components/common/ProgressBar';
+import Button from '../../components/common/Button';
 import { overallProgress } from '../../utils/helpers';
 import styles from './Dashboard.module.css';
 
@@ -188,10 +189,10 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <div className={styles.activityContent}>
-                  <p className={styles.activityLesson}>{item.lesson_title}</p>
-                  <p className={styles.activityCourse}>{item.course_title}</p>
+                  <p className={styles.activityLesson}>{item.title || item.lesson_title}</p>
+                  <p className={styles.activityCourse}>{item.course || item.course_title}</p>
                 </div>
-                <span className={styles.activityTime}>{item.watched_at}</span>
+                <span className={styles.activityTime}>{item.timestamp || item.watched_at}</span>
               </div>
             ))}
           </div>

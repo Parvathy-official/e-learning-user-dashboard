@@ -70,20 +70,20 @@ export function CourseProvider({ children }) {
         setEnrollments((prev) => {
           const merged = [...prev];
           data.forEach((d) => {
-            if (!merged.some((m) => m.course_id === d.course_id)) {
+            if (!merged.some((m) => String(m.course_id) === String(d.course_id))) {
               merged.push(d);
             }
           });
           return merged;
         });
       }
-      return enrollments;
+      return data;
     } catch {
-      return enrollments;
+      return [];
     } finally {
       setEnrollmentsLoading(false);
     }
-  }, [enrollments]);
+  }, []);
 
   const isEnrolled = useCallback(
     (courseId) => enrollments.some((e) => e.course_id === courseId),

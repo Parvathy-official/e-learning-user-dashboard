@@ -228,52 +228,237 @@
 .open2 { opacity: 0; }
 .open3 { transform: translateY(-7px) rotate(-45deg); }
 
-/* Mobile Menu */
-.mobileMenu {
+/* Mobile Drawer & Overlay */
+.mobileOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(340px, 86vw);
+  background: #0B1116;
+  border-left: 1px solid var(--border);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.95);
+  z-index: 101;
   display: flex;
   flex-direction: column;
-  background: var(--card-bg);
-  border-top: 1px solid var(--border);
-  padding: var(--space-4) var(--space-4) var(--space-6);
-  gap: var(--space-1);
-  animation: slideDown 0.2s ease;
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
 }
 
-.mobileLink {
-  padding: 12px 14px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
-.mobileLink:hover { background: var(--border-light); color: var(--text-dark); }
 
-.mobilePrimary {
-  background: var(--primary);
-  color: #fff !important;
-  text-align: center;
-  margin-top: var(--space-2);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.mobilePrimary:hover { background: var(--primary-dark) !important; }
 
-.mobileLogout {
-  padding: 12px 14px;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--error);
+.mobileDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.closeBtn {
   background: none;
   border: none;
-  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   cursor: pointer;
-  text-align: left;
-  transition: background var(--transition-fast);
-  margin-top: var(--space-2);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
-.mobileLogout:hover { background: var(--error-bg); }
+.closeBtn:hover {
+  color: var(--text-dark);
+  background: var(--border-light);
+}
+
+.mobileUserCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #080D12;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobileAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+.mobileAvatarFallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #030708;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+  flex-shrink: 0;
+}
+
+.mobileUserInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileUserName {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileUserEmail {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin: 2px 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileUserBadge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.mobileNavLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 14px;
+  flex: 1;
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.mobileNavLink:hover {
+  color: var(--text-dark);
+  background: var(--border-light);
+}
+
+.mobileNavLink.mobileActive {
+  color: var(--primary);
+  background: var(--primary-bg);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  font-weight: 600;
+}
+
+.mobileDrawerFooter {
+  padding: 16px 20px 24px;
+  border-top: 1px solid var(--border);
+  background: #080D12;
+}
+
+.mobileLogoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--error);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mobileLogoutBtn:hover {
+  background: var(--error-bg);
+  border-color: var(--error);
+}
+
+.mobileAuthGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobileLoginBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+.mobileLoginBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobileSignupBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: var(--primary);
+  color: #030708;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+  transition: all var(--transition-fast);
+}
+.mobileSignupBtn:hover {
+  background: var(--primary-light);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
+}
