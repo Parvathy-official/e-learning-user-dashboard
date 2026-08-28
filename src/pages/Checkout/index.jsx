@@ -16,7 +16,7 @@ import styles from './Checkout.module.css';
 export default function Checkout() {
   const { courseId } = useParams();
   const { currentUser } = useAuth();
-  const { addEnrollment } = useCourseContext();
+  const { addEnrollment, addPurchase } = useCourseContext();
   const navigate = useNavigate();
 
   const [course, setCourse] = useState(null);
@@ -24,16 +24,16 @@ export default function Checkout() {
   const [paying, setPaying] = useState(false);
 
   useEffect(() => {
-    courseService.getCourseById(courseId).then(setCourse).catch(() => navigate('/courses')).finally(() => setLoading(false));
+    courseService.getCourseById(courseId).then(setCourse).catch(() => navigate('/')).finally(() => setLoading(false));
   }, [courseId, navigate]);
 
   const handlePayment = async () => {
     setPaying(true);
     try {
-      // Step 1: Create order on backend
+      // Step 1: Create order on backend / mock
       const order = await paymentService.createOrder(courseId);
 
-      // Step 2: Open payment modal (Razorpay or mock)
+      // Step 2: Open payment modal
       const paymentResult = await paymentService.openRazorpay({
         key: order.key,
         amount: order.amount,
@@ -45,7 +45,7 @@ export default function Checkout() {
         theme: { color: '#06B6D4' },
       });
 
-      // Step 3: Verify payment with backend
+      // Step 3: Verify payment
       const verification = await paymentService.verifyPayment({
         razorpay_order_id: paymentResult.razorpay_order_id,
         razorpay_payment_id: paymentResult.razorpay_payment_id,
@@ -54,15 +54,31 @@ export default function Checkout() {
       });
 
       if (verification.success) {
-        // Step 4: Update enrollment state
+        const orderRef = `LF-${Date.now().toString().slice(-6)}`;
+        const finalPrice = course?.discounted_price || course?.price || 4999;
+
+        // Step 4: Record purchase in state & localStorage
+        addPurchase({
+          id: orderRef,
+          course_id: courseId,
+          course_title: course?.title,
+          purchase_date: new Date().toISOString(),
+          amount: finalPrice,
+          status: 'paid',
+          payment_method: 'Card / Online Payment',
+        });
+
+        // Step 5: Update enrollment state
         addEnrollment({
           course_id: courseId,
           progress_percentage: 0,
           completed_lessons: [],
-          last_watched_lesson: null,
+          last_watched_lesson: course?.modules?.[0]?.lessons?.[0]?.id || '101',
+          last_position_seconds: 0,
         });
-        toast.success('Payment successful! Enjoy your course! 🎉');
-        navigate(`/payment/success?course=${courseId}`);
+
+        toast.success('Payment successful! Access granted! 🎉');
+        navigate(`/payment-success?course=${courseId}&orderId=${orderRef}`);
       } else {
         throw new Error('Payment verification failed');
       }

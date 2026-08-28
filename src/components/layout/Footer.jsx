@@ -1,26 +1,20 @@
 // =========================================================
-//  Footer Component
+//  Footer Component — Simple Paid Online Course Platform
 // =========================================================
 
 import { Link } from 'react-router-dom';
 import styles from './Footer.module.css';
 
 const FOOTER_LINKS = {
-  Programs: [
-    { label: 'All Flagship Programs', to: '/courses' },
-    { label: 'Meta & Google Blueprint', to: '/courses/1' },
-    { label: 'E-Com Funnel Masterclass', to: '/courses/2' },
-    { label: 'Student Dashboard', to: '/dashboard' },
+  Platform: [
+    { label: 'Courses', to: '/' },
+    { label: 'My Learning', to: '/my-learning' },
+    { label: 'Purchase History', to: '/purchase-history' },
   ],
-  Resources: [
-    { label: 'ROAS & MER Calculator', to: '/courses/1' },
-    { label: 'Creative Swipe Files', to: '/courses/1' },
-    { label: 'CAPI Tracking SOPs', to: '/courses/1' },
-  ],
-  Legal: [
+  Support: [
+    { label: 'Terms of Service', to: '#' },
     { label: 'Privacy Policy', to: '#' },
-    { label: 'Terms of Enrollment', to: '#' },
-    { label: 'Refund Policy', to: '#' },
+    { label: '30-Day Refund Policy', to: '#' },
   ],
 };
 
@@ -36,28 +30,11 @@ export default function Footer() {
                 <polyline points="17 6 23 6 23 12" />
               </svg>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-              <span className={styles.logoText}>LearnFlow</span>
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>Performance</span>
-            </div>
+            <span className={styles.logoText}>LearnFlow</span>
           </Link>
           <p className={styles.tagline}>
-            The unfair advantage in paid media buying. Master full-funnel Meta Ads, Google PMax & Funnel CRO to scale profitable 7 and 8-figure brands.
+            Learn practical skills through focused online video courses with lifetime access and progress tracking.
           </p>
-          <div className={styles.socials}>
-            {/* Twitter/X */}
-            <a href="#" className={styles.socialLink} aria-label="Follow us on X">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            {/* LinkedIn */}
-            <a href="#" className={styles.socialLink} aria-label="Connect on LinkedIn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-            </a>
-            {/* YouTube */}
-            <a href="#" className={styles.socialLink} aria-label="Watch on YouTube">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-1.96C18.88 4 12 4 12 4s-6.88 0-8.6.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.4 19.54C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 001.94-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white"/></svg>
-            </a>
-          </div>
         </div>
 
         <div className={styles.links}>

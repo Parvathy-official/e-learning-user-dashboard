@@ -1,9 +1,9 @@
 // =========================================================
-//  CoursePlayer Page — Video learning interface
+//  CoursePlayer Page — Simple Paid Online Course Platform
 // =========================================================
 
-import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useCourseContext } from '../../hooks/useCourses';
 import courseService from '../../services/courseService';
@@ -15,8 +15,8 @@ import styles from './CoursePlayer.module.css';
 
 export default function CoursePlayer() {
   const { courseId, lessonId } = useParams();
-  const { isAuthenticated } = useAuth();
-  const { isEnrolled } = useCourseContext();
+  const { isAuthenticated, currentUser } = useAuth();
+  const { isEnrolled, enrollments, updateLessonProgress } = useCourseContext();
   const navigate = useNavigate();
 
   const [course, setCourse] = useState(null);
@@ -25,9 +25,12 @@ export default function CoursePlayer() {
   const [accessDenied, setAccessDenied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [videoLoading, setVideoLoading] = useState(false);
-  const [markingComplete, setMarkingComplete] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const enrolled = course ? isEnrolled(course.id) : false;
+  const lastProgressSave = useRef(0);
+
+  const enrollment = enrollments.find((e) => String(e.course_id) === String(courseId));
+  const completedLessons = enrollment?.completed_lessons || [];
+  const enrolled = isEnrolled(courseId);
 
   // Load course data
   useEffect(() => {
@@ -37,38 +40,33 @@ export default function CoursePlayer() {
         const data = await courseService.getCourseById(courseId);
         setCourse(data);
 
-        // Check access
-        if (isAuthenticated) {
-          const accessData = await courseService.checkCourseAccess(courseId);
-          if (!accessData.has_access) {
-            setAccessDenied(true);
-            setLoading(false);
-            return;
-          }
+        const allLessons = data.modules?.flatMap((m) => m.lessons) || [];
+        let initial;
+        if (lessonId) {
+          initial = allLessons.find((l) => String(l.id) === String(lessonId)) || allLessons[0];
+        } else if (enrollment?.last_watched_lesson) {
+          initial = allLessons.find((l) => String(l.id) === String(enrollment.last_watched_lesson)) || allLessons[0];
         } else {
+          initial = allLessons[0];
+        }
+
+        // Access check: If not enrolled and lesson is not preview, block access
+        if (!enrolled && !initial?.is_preview) {
           setAccessDenied(true);
           setLoading(false);
           return;
         }
 
-        // Select initial lesson
-        const allLessons = data.modules?.flatMap((m) => m.lessons) || [];
-        let initial;
-        if (lessonId) {
-          initial = allLessons.find((l) => l.id === lessonId) || allLessons[0];
-        } else {
-          initial = allLessons[0];
-        }
         if (initial) setCurrentLesson(initial);
       } catch {
         toast.error('Failed to load course');
-        navigate('/my-courses');
+        navigate('/my-learning');
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [courseId, lessonId, isAuthenticated, navigate]);
+  }, [courseId, lessonId, enrolled, enrollment?.last_watched_lesson, navigate]);
 
   // Fetch video URL when lesson changes
   useEffect(() => {
@@ -80,7 +78,7 @@ export default function CoursePlayer() {
         const data = await courseService.getVideoUrl(courseId, currentLesson.id);
         setVideoUrl(data.url);
       } catch {
-        toast.error('Failed to load video. Please try again.');
+        toast.error('Failed to load lesson video');
       } finally {
         setVideoLoading(false);
       }
@@ -89,40 +87,58 @@ export default function CoursePlayer() {
   }, [currentLesson, courseId, accessDenied]);
 
   const handleLessonSelect = useCallback((lesson) => {
+    if (!enrolled && !lesson.is_preview) {
+      toast('Please purchase this course to unlock this lesson.', { icon: '🔒' });
+      return;
+    }
     setCurrentLesson(lesson);
     navigate(`/course/${courseId}/learn/${lesson.id}`, { replace: true });
     setSidebarOpen(false);
-  }, [courseId, navigate]);
+  }, [courseId, enrolled, navigate]);
 
-  const handleMarkComplete = async () => {
+  const handleMarkComplete = () => {
     if (!currentLesson) return;
-    setMarkingComplete(true);
-    try {
-      await courseService.markLessonComplete(courseId, currentLesson.id);
-      toast.success('Lesson marked as complete! ✓');
-    } catch {
-      toast.error('Failed to mark lesson. Please try again.');
-    } finally {
-      setMarkingComplete(false);
+    updateLessonProgress(courseId, currentLesson.id, 0, 0, true);
+    toast.success(`Completed: ${currentLesson.title} ✓`);
+  };
+
+  const handleTimeUpdate = (currentTime, duration) => {
+    if (!currentLesson || !duration) return;
+    const now = Date.now();
+    // Throttle progress updates to every 4 seconds
+    if (now - lastProgressSave.current > 4000) {
+      lastProgressSave.current = now;
+      const isComplete = currentTime / duration >= 0.9;
+      updateLessonProgress(courseId, currentLesson.id, currentTime, duration, isComplete);
     }
   };
 
   const handleNext = () => {
     if (!course) return;
     const allLessons = course.modules?.flatMap((m) => m.lessons) || [];
-    const idx = allLessons.findIndex((l) => l.id === currentLesson?.id);
-    if (idx < allLessons.length - 1) handleLessonSelect(allLessons[idx + 1]);
+    const idx = allLessons.findIndex((l) => String(l.id) === String(currentLesson?.id));
+    if (idx < allLessons.length - 1) {
+      const nextLesson = allLessons[idx + 1];
+      if (enrolled || nextLesson.is_preview) {
+        handleLessonSelect(nextLesson);
+      } else {
+        toast('Next lesson is locked. Please purchase the course for full access.', { icon: '🔒' });
+      }
+    } else {
+      toast.success('🎉 You have completed all lessons in this course!');
+    }
   };
 
   const handlePrev = () => {
     if (!course) return;
     const allLessons = course.modules?.flatMap((m) => m.lessons) || [];
-    const idx = allLessons.findIndex((l) => l.id === currentLesson?.id);
+    const idx = allLessons.findIndex((l) => String(l.id) === String(currentLesson?.id));
     if (idx > 0) handleLessonSelect(allLessons[idx - 1]);
   };
 
   const allLessons = course?.modules?.flatMap((m) => m.lessons) || [];
-  const currentIdx = allLessons.findIndex((l) => l.id === currentLesson?.id);
+  const currentIdx = allLessons.findIndex((l) => String(l.id) === String(currentLesson?.id));
+  const isCurrentLessonComplete = currentLesson && completedLessons.includes(String(currentLesson.id));
 
   // Access denied state
   if (!loading && accessDenied) {
@@ -134,27 +150,25 @@ export default function CoursePlayer() {
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
           </div>
-          <h2 className={styles.accessTitle}>Access Required</h2>
+          <h2 className={styles.accessTitle}>Course Enrollment Required</h2>
           <p className={styles.accessDesc}>
             {!isAuthenticated
-              ? 'Please log in to access this course.'
-              : 'You need to enroll in this course to access the video lessons.'}
+              ? 'Please log in and purchase this course to access the lessons.'
+              : 'You have not enrolled in this course yet. Purchase once for lifetime access.'}
           </p>
           <div className={styles.accessActions}>
             {!isAuthenticated ? (
-              <Button variant="primary" size="lg" onClick={() => navigate('/login')}>
-                Log In to Continue
+              <Button variant="primary" size="lg" onClick={() => navigate('/login', { state: { from: { pathname: `/checkout/${courseId}` } } })}>
+                Log In & Buy Course
               </Button>
             ) : (
-              <>
-                <Button variant="primary" size="lg" onClick={() => navigate(`/checkout/${courseId}`)}>
-                  Enroll Now
-                </Button>
-                <Button variant="outline" size="md" onClick={() => navigate(`/courses/${courseId}`)}>
-                  View Course Details
-                </Button>
-              </>
+              <Button variant="primary" size="lg" onClick={() => navigate(`/checkout/${courseId}`)}>
+                Buy Course Now
+              </Button>
             )}
+            <Button variant="outline" size="md" onClick={() => navigate(`/courses/${courseId}`)}>
+              View Course Syllabus
+            </Button>
           </div>
         </div>
       </div>
@@ -165,7 +179,7 @@ export default function CoursePlayer() {
     return (
       <div className={styles.loadingPage}>
         <div className={styles.spinner} aria-label="Loading course…" />
-        <p>Loading course…</p>
+        <p>Loading course player…</p>
       </div>
     );
   }
@@ -177,69 +191,28 @@ export default function CoursePlayer() {
     ...m,
     lessons: m.lessons.map((l) => ({
       ...l,
+      is_completed: completedLessons.includes(String(l.id)),
       is_locked: !enrolled && !l.is_preview,
     })),
   })) || [];
 
-  const [activeTab, setActiveTab] = useState('overview');
-  const [qaInput, setQaInput] = useState('');
-  const [qaList, setQaList] = useState([
-    {
-      id: 'q1',
-      author: 'Vikram Singh',
-      role: 'Growth Lead @ E-Com Brand',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
-      time: '2 days ago',
-      question: 'When setting up the Dynamic Creative Testing sandbox, what budget split do you recommend relative to the main CBO scaling campaign?',
-      answer: 'Great question! We typically allocate 15% to 20% of your daily budget to the DCT Sandbox. Once a winning creative angle produces 3+ purchases at or below target CPA, graduate the Post ID directly into your scaling CBO.',
-      instructor: 'Devon Vance',
-    },
-    {
-      id: 'q2',
-      author: 'Sophia Chen',
-      role: 'Media Buyer',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
-      time: '5 days ago',
-      question: 'How do you prevent ASC campaigns from retargeting existing customers too heavily?',
-      answer: 'Set an Existing Customer Budget Cap of 0% to 5% inside the Advantage+ Shopping settings. Always define your 180-day customer audience list in your Account Custom Audiences tab.',
-      instructor: 'Devon Vance',
-    },
-  ]);
-
-  const handlePostQuestion = (e) => {
-    e.preventDefault();
-    if (!qaInput.trim()) return;
-    setQaList([
-      {
-        id: `q-${Date.now()}`,
-        author: currentUser?.name || 'Student',
-        role: 'Cohort Member',
-        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
-        time: 'Just now',
-        question: qaInput.trim(),
-        answer: null,
-      },
-      ...qaList,
-    ]);
-    setQaInput('');
-    toast.success('Question submitted to the instructor!');
-  };
-
   return (
     <div className={styles.page}>
-      {/* Top bar */}
+      {/* Top Navigation Bar */}
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={() => navigate(`/courses/${courseId}`)} aria-label="Back to course">
+        <Link to={`/courses/${courseId}`} className={styles.backBtn} aria-label="Back to course details">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6" />
           </svg>
           <span className={styles.backText}>{course.title}</span>
-        </button>
+        </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-bg)', padding: '4px 10px', borderRadius: 9999, border: '1px solid rgba(6,182,212,0.25)' }}>
-            🔥 3-Day Learning Streak
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          {enrollment && (
+            <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              {enrollment.progress_percentage || 0}% completed
+            </span>
+          )}
 
           {/* Mobile sidebar toggle */}
           <button
@@ -256,10 +229,9 @@ export default function CoursePlayer() {
         </div>
       </div>
 
-      {/* Main layout */}
+      {/* Main Distraction-Free Layout */}
       <div className={styles.layout}>
-
-        {/* Video column */}
+        {/* Left Video Column */}
         <div className={styles.videoCol}>
           {videoLoading ? (
             <div className={styles.videoPlaceholder}>
@@ -269,16 +241,18 @@ export default function CoursePlayer() {
             <VideoPlayer
               videoUrl={videoUrl}
               lessonTitle={currentLesson?.title}
+              initialTime={enrollment?.last_position_seconds || 0}
               onEnded={handleNext}
+              onTimeUpdate={handleTimeUpdate}
             />
           )}
 
-          {/* Lesson controls */}
+          {/* Lesson Controls */}
           <div className={styles.lessonControls}>
             <div className={styles.lessonInfo}>
               <p className={styles.lessonTitle}>{currentLesson?.title}</p>
               <p className={styles.lessonProgress}>
-                Lesson {currentIdx + 1} of {allLessons.length} • {currentLesson?.duration}
+                Lesson {currentIdx >= 0 ? currentIdx + 1 : 1} of {allLessons.length} • {currentLesson?.duration}
               </p>
             </div>
 
@@ -290,17 +264,16 @@ export default function CoursePlayer() {
                 disabled={currentIdx <= 0}
                 leftIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>}
               >
-                Prev
+                Previous
               </Button>
 
               <Button
-                variant="outline"
+                variant={isCurrentLessonComplete ? 'primary' : 'outline'}
                 size="sm"
                 onClick={handleMarkComplete}
-                loading={markingComplete}
                 leftIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
               >
-                Mark Complete
+                {isCurrentLessonComplete ? '✓ Completed' : 'Mark as Complete'}
               </Button>
 
               <Button
@@ -310,176 +283,26 @@ export default function CoursePlayer() {
                 disabled={currentIdx >= allLessons.length - 1}
                 rightIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>}
               >
-                Next
+                Next Lesson
               </Button>
             </div>
           </div>
 
-          {/* Learning Platform Tabs */}
-          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: '#080D12' }}>
-              <button
-                onClick={() => setActiveTab('overview')}
-                style={{
-                  padding: '14px 20px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: activeTab === 'overview' ? '2px solid var(--primary)' : '2px solid transparent',
-                  color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-secondary)',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
-              >
-                📑 Overview & SOPs
-              </button>
-              <button
-                onClick={() => setActiveTab('downloads')}
-                style={{
-                  padding: '14px 20px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: activeTab === 'downloads' ? '2px solid var(--primary)' : '2px solid transparent',
-                  color: activeTab === 'downloads' ? 'var(--primary)' : 'var(--text-secondary)',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
-              >
-                📥 Toolkits & Templates (3)
-              </button>
-              <button
-                onClick={() => setActiveTab('qa')}
-                style={{
-                  padding: '14px 20px',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: activeTab === 'qa' ? '2px solid var(--primary)' : '2px solid transparent',
-                  color: activeTab === 'qa' ? 'var(--primary)' : 'var(--text-secondary)',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
-              >
-                💬 Student Q&A ({qaList.length})
-              </button>
-            </div>
-
-            <div style={{ padding: '24px' }}>
-              {activeTab === 'overview' && (
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 12px' }}>
-                    Lesson Core Takeaways & Implementation Checklist
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 16 }}>
-                    In this lesson, you will learn the exact framework used to test creatives, set bid caps, and avoid learning phase resets when scaling ad spend.
-                  </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: '#080D12', padding: '16px 20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
-                      <span>Establish true break-even CAC before setting campaign bid strategies.</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
-                      <span>Separate Creative Testing Sandboxes (DCT ABO) from the Main Scaling CBO.</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
-                      <span>Ensure Server-Side CAPI Event Match Quality is 8.2 or higher in Meta Events Manager.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'downloads' && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
-                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>📄 Notion Scale SOP</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>DCT Testing & Scaling Protocol</div>
-                    </div>
-                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded SOP template!')}>
-                      Download
-                    </button>
-                  </div>
-
-                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>📊 ROAS Calculator (Excel)</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>MER & LTV Sensitivity Model</div>
-                    </div>
-                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded ROAS Model!')}>
-                      Download
-                    </button>
-                  </div>
-
-                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>🎬 UGC Brief Swipe File</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>15 High-Converting Hook Scripts</div>
-                    </div>
-                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded UGC Briefs!')}>
-                      Download
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'qa' && (
-                <div>
-                  <form onSubmit={handlePostQuestion} style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
-                    <input
-                      type="text"
-                      value={qaInput}
-                      onChange={(e) => setQaInput(e.target.value)}
-                      placeholder="Ask the instructor a question about this lesson…"
-                      style={{
-                        flex: 1,
-                        background: '#080D12',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: '10px 14px',
-                        color: 'var(--text-dark)',
-                        fontSize: '0.875rem',
-                        outline: 'none',
-                      }}
-                    />
-                    <Button variant="primary" size="sm" type="submit">
-                      Post Question
-                    </Button>
-                  </form>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {qaList.map((q) => (
-                      <div key={q.id} style={{ background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                          <img src={q.avatar} alt={q.author} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
-                          <div>
-                            <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-dark)' }}>{q.author}</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginLeft: 8 }}>{q.time}</span>
-                          </div>
-                        </div>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>
-                          {q.question}
-                        </p>
-
-                        {q.answer && (
-                          <div style={{ background: 'rgba(6,182,212,0.06)', borderLeft: '3px solid var(--primary)', padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>
-                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <span>Instructor Response — {q.instructor}</span>
-                              <span style={{ background: 'var(--primary)', color: '#030708', fontSize: '0.65rem', padding: '1px 5px', borderRadius: 4, fontWeight: 800 }}>VERIFIED</span>
-                            </div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.5 }}>
-                              {q.answer}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* Lesson Description & Resources Card */}
+          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px', marginTop: 20 }}>
+            <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 8px' }}>
+              About this lesson
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: '0 0 16px' }}>
+              Follow along with the video, review the key points, and apply the frameworks in your own ad accounts. When finished, mark the lesson as complete or let automatic tracking mark it for you.
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', background: '#080D12', padding: '6px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                ⏱️ Duration: {currentLesson?.duration}
+              </span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', background: '#080D12', padding: '6px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                {isCurrentLessonComplete ? '✅ Status: Completed' : '⏳ Status: In Progress'}
+              </span>
             </div>
           </div>
         </div>

@@ -14,7 +14,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || '/my-learning';
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});

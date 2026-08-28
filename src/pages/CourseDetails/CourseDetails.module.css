@@ -147,55 +147,239 @@
 .requirementItem { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; color: var(--text-primary); }
 .requirementItem svg { flex-shrink: 0; margin-top: 3px; }
 
-/* Instructor card */
-.instructorCard { display: flex; gap: var(--space-5); align-items: flex-start; }
-.instructorBigAvatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-.instructorCardName { font-size: 1.0625rem; font-weight: 700; color: var(--text-dark); margin: 0 0 8px; }
-.instructorCardBio { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
-@media (max-width: 480px) { .instructorCard { flex-direction: column; } }
-
-/* FAQ */
-.faqList { display: flex; flex-direction: column; gap: var(--space-3); }
-.faqItem { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.faqBtn {
-  display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 16px 20px; background: var(--card-bg);
-  border: none; cursor: pointer; font-family: var(--font-sans);
-  font-size: 0.9375rem; font-weight: 600; color: var(--text-dark);
-  text-align: left; gap: 16px;
+/* Course Info Pills */
+.infoPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: var(--space-6);
 }
-.faqBtn:hover { background: rgba(255, 255, 255, 0.04); }
-.faqAnswer { padding: 0 20px 16px; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
 
-/* Sidebar */
-.sidebar {
+.infoPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #080D12;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.infoPill svg {
+  color: var(--primary);
+}
+
+.checkIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.curriculumHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.expandAllBtn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.expandAllBtn:hover {
+  text-decoration: underline;
+}
+
+.lockedTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: #080D12;
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Right Sticky Purchase Card */
+.right {
   position: sticky;
-  top: calc(var(--navbar-height) + 20px);
+  top: calc(var(--navbar-height) + 24px);
   height: fit-content;
 }
+
 .stickyCard {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-2xl);
+  padding: 28px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), 0 0 25px rgba(6, 182, 212, 0.1);
+}
+
+.priceHeader {
+  margin-bottom: 8px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.currentPrice {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.03em;
+}
+
+.originalPrice {
+  font-size: 1.125rem;
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.discountBadge {
+  background: var(--error-bg);
+  color: var(--error);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.guaranteeText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--success);
+  font-weight: 500;
+  margin-top: 14px;
+}
+
+.includesList {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.includesHeading {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+}
+
+.includeItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.includeItem svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modalCard {
+  width: 100%;
+  maxWidth: 800px;
+  background: #0B1116;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(6, 182, 212, 0.1);
-}
-.sideThumbWrap { width: 100%; }
-.sideThumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-.sideBody { padding: var(--space-5) var(--space-6) var(--space-6); }
-
-.priceRow { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-4); flex-wrap: wrap; }
-.price { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.04em; }
-.originalPrice { font-size: 1rem; color: var(--text-tertiary); text-decoration: line-through; }
-.discountBadge { background: var(--error-bg); color: var(--error); font-size: 0.78rem; font-weight: 700; padding: 3px 8px; border-radius: var(--radius-sm); }
-
-.guarantee {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.8125rem; color: var(--success); font-weight: 500;
-  text-align: center; justify-content: center;
-  margin: var(--space-3) 0 0;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
 }
 
-.includes { margin-top: var(--space-5); }
-.includesTitle { font-size: 0.875rem; font-weight: 700; color: var(--text-dark); margin: 0 0 var(--space-3); }
-.includeItem { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--text-secondary); padding: 5px 0; }
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: #080D12;
+}
+
+.modalBadge {
+  font-size: 0.72rem;
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.modalTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 2px 0 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modalBody {
+  padding: 20px;
+}
+
+.videoPlayerContainer {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.modalFooterText {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}

@@ -8,8 +8,14 @@ import styles from './CourseProgress.module.css';
 
 export default function CourseProgress({ course, enrollment }) {
   const { id, title, thumbnail, instructor, total_lessons } = course;
-  const { progress_percentage, completed_lessons, last_watched_lesson } = enrollment;
-  const completedCount = completed_lessons?.length ?? 0;
+  const progress = enrollment?.progress_percentage ?? 0;
+  const completedLessons = enrollment?.completed_lessons ?? [];
+  const completedCount = completedLessons.length;
+  const lastLessonId = enrollment?.last_watched_lesson;
+
+  const targetLink = lastLessonId
+    ? `/course/${id}/learn/${lastLessonId}`
+    : `/course/${id}/learn`;
 
   return (
     <div className={styles.card}>
@@ -17,30 +23,27 @@ export default function CourseProgress({ course, enrollment }) {
         <img src={thumbnail} alt={title} className={styles.thumb} loading="lazy" />
       </div>
       <div className={styles.body}>
-        <h3 className={styles.title}>{title}</h3>
-        <p className={styles.instructor}>{instructor}</p>
-
-        {last_watched_lesson && (
-          <p className={styles.lastLesson}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-            </svg>
-            Last watched: <em>{last_watched_lesson.title}</em>
-          </p>
-        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h3 className={styles.title}>{title}</h3>
+            <p className={styles.instructor}>{instructor}</p>
+          </div>
+          {progress === 100 && (
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', background: 'var(--success-bg)', border: '1px solid rgba(16,185,129,0.3)', padding: '2px 8px', borderRadius: 9999 }}>
+              ✓ Completed
+            </span>
+          )}
+        </div>
 
         <div className={styles.progressArea}>
-          <ProgressBar value={progress_percentage} showPercent size="sm" />
+          <ProgressBar value={progress} showPercent size="sm" />
           <p className={styles.lessonCount}>
-            {completedCount} / {total_lessons} lessons completed
+            {completedCount} of {total_lessons} lessons completed ({progress}%)
           </p>
         </div>
 
-        <Link to={`/course/${id}/learn`} className={styles.continueBtn}>
-          {progress_percentage === 0 ? 'Start Learning' : 'Continue Learning'}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+        <Link to={targetLink} className={styles.continueBtn}>
+          {progress === 0 ? 'Start Learning →' : progress === 100 ? 'Review Course →' : 'Continue Learning →'}
         </Link>
       </div>
     </div>

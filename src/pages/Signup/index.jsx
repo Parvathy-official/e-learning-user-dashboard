@@ -43,7 +43,7 @@ export default function Signup() {
     try {
       await signup({ name: form.name.trim(), email: form.email, password: form.password });
       toast.success('Account created! Welcome to LearnFlow 🎉');
-      navigate('/dashboard');
+      navigate('/my-learning');
     } catch (err) {
       const msg = err?.response?.data?.email?.[0] || err?.response?.data?.detail || err?.message || 'Signup failed';
       toast.error(msg);

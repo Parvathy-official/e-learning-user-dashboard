@@ -9,7 +9,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './VideoPlayer.module.css';
 
-export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpdate }) {
+export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, onEnded, onTimeUpdate }) {
   const videoRef = useRef(null);
   const { currentUser } = useAuth();
   const [playing, setPlaying] = useState(false);
@@ -22,6 +22,12 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [buffered, setBuffered] = useState(0);
   const controlsTimer = useRef(null);
+  const initialTimeSet = useRef(false);
+
+  // Reset initialTimeSet on videoUrl change
+  useEffect(() => {
+    initialTimeSet.current = false;
+  }, [videoUrl]);
 
   // Auto-hide controls after 3s of inactivity
   const resetControlsTimer = useCallback(() => {
@@ -98,6 +104,10 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
     if (v) {
       setDuration(v.duration);
       v.playbackRate = playbackSpeed;
+      if (initialTime > 0 && !initialTimeSet.current && initialTime < v.duration - 5) {
+        v.currentTime = initialTime;
+        initialTimeSet.current = true;
+      }
     }
   };
 

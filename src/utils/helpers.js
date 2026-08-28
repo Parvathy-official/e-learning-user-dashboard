@@ -75,6 +75,19 @@ export const getInitials = (name = '') =>
 export const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 /**
+ * Format a date string (e.g. "Aug 28, 2026")
+ */
+export const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
+/**
  * Generate a random ID (for optimistic UI, not production IDs)
  */
 export const uid = () => Math.random().toString(36).slice(2);

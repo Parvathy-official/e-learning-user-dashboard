@@ -1,23 +1,21 @@
 // =========================================================
-//  PaymentSuccess Page
+//  PaymentSuccess Page — Simple Paid Online Course Platform
 // =========================================================
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useCourseContext } from '../../hooks/useCourses';
 import Button from '../../components/common/Button';
 import styles from './PaymentSuccess.module.css';
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const courseId = searchParams.get('course');
+  const orderId = searchParams.get('orderId');
+  const { courses } = useCourseContext();
   const navigate = useNavigate();
 
-  // Auto redirect after 10 seconds
-  useEffect(() => {
-    if (!courseId) return;
-    const timer = setTimeout(() => navigate(`/course/${courseId}/learn`), 10000);
-    return () => clearTimeout(timer);
-  }, [courseId, navigate]);
+  const currentCourse = courses.find((c) => String(c.id) === String(courseId));
 
   return (
     <div className={styles.page}>
@@ -29,11 +27,18 @@ export default function PaymentSuccess() {
         </div>
         <h1 className={styles.title}>Payment Successful!</h1>
         <p className={styles.desc}>
-          Congratulations! You now have full access to this course. Start learning right away.
+          Thank you! You now have full lifetime access to {currentCourse ? <strong>{currentCourse.title}</strong> : 'your course'}.
         </p>
 
+        {orderId && (
+          <div style={{ background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 16px', margin: '0 0 24px', display: 'inline-block' }}>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)' }}>Order Reference: </span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', fontFamily: 'monospace' }}>{orderId}</span>
+          </div>
+        )}
+
         <div className={styles.benefits}>
-          {['Lifetime access granted', 'Watch on any device', 'Track your progress', 'Certificate on completion'].map((b) => (
+          {['Instant access to all lessons', 'Progress tracked automatically', 'Lifetime access & updates', 'Certificate upon completion'].map((b) => (
             <div key={b} className={styles.benefit}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12" />
@@ -49,14 +54,10 @@ export default function PaymentSuccess() {
               Start Learning Now →
             </Button>
           )}
-          <Link to="/dashboard">
-            <Button variant="outline" size="md">Go to Dashboard</Button>
+          <Link to="/my-learning">
+            <Button variant="outline" size="lg">Go to My Learning</Button>
           </Link>
         </div>
-
-        {courseId && (
-          <p className={styles.redirectNote}>Redirecting to your course in 10 seconds…</p>
-        )}
       </div>
     </div>
   );

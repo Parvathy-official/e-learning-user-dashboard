@@ -105,36 +105,25 @@
   margin: 0;
 }
 
-.meta {
+.metaRow {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-}
-
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 0;
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-  margin-top: 2px;
-}
-
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 8px;
   font-size: 0.78rem;
   color: var(--text-tertiary);
   font-weight: 500;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 4px;
 }
 
-.priceRow {
+.footerRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .prices {
@@ -144,7 +133,7 @@
 }
 
 .currentPrice {
-  font-size: 1.125rem;
+  font-size: 1.1875rem;
   font-weight: 800;
   color: var(--text-dark);
   letter-spacing: -0.02em;
@@ -158,11 +147,18 @@
 
 .cta {
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary);
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  background: var(--primary-bg);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  transition: all var(--transition-fast);
   display: inline-block;
 }
+
 .card:hover .cta {
-  transform: translateX(2px);
+  background: var(--primary);
+  color: #030708;
+  border-color: var(--primary);
 }

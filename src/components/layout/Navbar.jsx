@@ -1,5 +1,5 @@
 // =========================================================
-//  Navbar Component
+//  Navbar Component — Simple Paid Online Course Platform
 // =========================================================
 
 import { useState, useEffect } from 'react';
@@ -40,24 +40,21 @@ export default function Navbar() {
               <polyline points="17 6 23 6 23 12" />
             </svg>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-            <span className={styles.logoText}>LearnFlow</span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>Performance</span>
-          </div>
+          <span className={styles.logoText}>LearnFlow</span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className={styles.desktopNav}>
-          <NavLink to="/courses" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
-            Programs
+          <NavLink to="/" end className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
+            Courses
           </NavLink>
           {isAuthenticated && (
             <>
-              <NavLink to="/dashboard" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
-                Dashboard
+              <NavLink to="/my-learning" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
+                My Learning
               </NavLink>
-              <NavLink to="/my-courses" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
-                My Courses
+              <NavLink to="/purchase-history" className={({ isActive }) => [styles.navLink, isActive ? styles.active : ''].join(' ')}>
+                Purchase History
               </NavLink>
             </>
           )}
@@ -67,9 +64,6 @@ export default function Navbar() {
         <div className={styles.actions}>
           {isAuthenticated ? (
             <div className={styles.userMenu}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-bg)', padding: '5px 12px', borderRadius: 9999, border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                🔥 3-Day Streak
-              </span>
               <button
                 className={styles.avatarBtn}
                 onClick={() => setDropdownOpen((o) => !o)}
@@ -97,17 +91,17 @@ export default function Navbar() {
                       <p className={styles.dropdownEmail}>{currentUser?.email}</p>
                     </div>
                     <div className={styles.dropdownDivider} />
-                    <Link to="/dashboard" className={styles.dropdownItem} role="menuitem" onClick={() => setDropdownOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
-                      Dashboard
-                    </Link>
-                    <Link to="/my-courses" className={styles.dropdownItem} role="menuitem" onClick={() => setDropdownOpen(false)}>
+                    <Link to="/my-learning" className={styles.dropdownItem} role="menuitem" onClick={() => setDropdownOpen(false)}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" /></svg>
-                      My Courses
+                      My Learning
+                    </Link>
+                    <Link to="/purchase-history" className={styles.dropdownItem} role="menuitem" onClick={() => setDropdownOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                      Purchase History
                     </Link>
                     <Link to="/profile" className={styles.dropdownItem} role="menuitem" onClick={() => setDropdownOpen(false)}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                      Profile
+                      Profile Settings
                     </Link>
                     <div className={styles.dropdownDivider} />
                     <button className={[styles.dropdownItem, styles.logoutItem].join(' ')} role="menuitem" onClick={handleLogout}>
@@ -124,7 +118,7 @@ export default function Navbar() {
                 <Button variant="ghost" size="sm">Log in</Button>
               </Link>
               <Link to="/signup">
-                <Button variant="primary" size="sm">Sign up free</Button>
+                <Button variant="primary" size="sm">Sign up</Button>
               </Link>
             </div>
           )}
@@ -146,20 +140,26 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className={styles.mobileMenu} role="dialog" aria-label="Mobile navigation">
-          <NavLink to="/courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
-            Programs
+          <NavLink to="/" end className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+            Courses
           </NavLink>
           {isAuthenticated ? (
             <>
-              <NavLink to="/dashboard" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Dashboard</NavLink>
-              <NavLink to="/my-courses" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>My Courses</NavLink>
-              <NavLink to="/profile" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Profile</NavLink>
+              <NavLink to="/my-learning" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                My Learning
+              </NavLink>
+              <NavLink to="/purchase-history" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                Purchase History
+              </NavLink>
+              <NavLink to="/profile" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
+                Profile
+              </NavLink>
               <button className={styles.mobileLogout} onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <>
               <Link to="/login" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Log in</Link>
-              <Link to="/signup" className={[styles.mobileLink, styles.mobilePrimary].join(' ')} onClick={() => setMenuOpen(false)}>Sign up free</Link>
+              <Link to="/signup" className={[styles.mobileLink, styles.mobilePrimary].join(' ')} onClick={() => setMenuOpen(false)}>Sign up</Link>
             </>
           )}
         </div>

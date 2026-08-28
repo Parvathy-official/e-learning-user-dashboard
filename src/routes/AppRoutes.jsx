@@ -2,7 +2,7 @@
 //  AppRoutes — All application routes
 // =========================================================
 
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
 // Public pages
@@ -16,6 +16,7 @@ import NotFound from '../pages/NotFound';
 // Authenticated pages
 import Dashboard from '../pages/Dashboard';
 import MyCourses from '../pages/MyCourses';
+import PurchaseHistory from '../pages/PurchaseHistory';
 import CoursePlayer from '../pages/CoursePlayer';
 import Checkout from '../pages/Checkout';
 import PaymentSuccess from '../pages/PaymentSuccess';
@@ -34,20 +35,28 @@ export default function AppRoutes() {
 
       {/* ── Authenticated Routes ── */}
       <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/my-courses"
+        path="/my-learning"
         element={
           <ProtectedRoute>
             <MyCourses />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/my-courses"
+        element={<Navigate to="/my-learning" replace />}
+      />
+      <Route
+        path="/purchase-history"
+        element={
+          <ProtectedRoute>
+            <PurchaseHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={<Navigate to="/my-learning" replace />}
       />
       <Route
         path="/profile"
@@ -82,12 +91,16 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/payment/success"
+        path="/payment-success"
         element={
           <ProtectedRoute>
             <PaymentSuccess />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/payment/success"
+        element={<Navigate to="/payment-success" replace />}
       />
       <Route
         path="/payment/failed"
