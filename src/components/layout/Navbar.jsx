@@ -67,6 +67,9 @@ export default function Navbar() {
         <div className={styles.actions}>
           {isAuthenticated ? (
             <div className={styles.userMenu}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-bg)', padding: '5px 12px', borderRadius: 9999, border: '1px solid rgba(6,182,212,0.25)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                🔥 3-Day Streak
+              </span>
               <button
                 className={styles.avatarBtn}
                 onClick={() => setDropdownOpen((o) => !o)}

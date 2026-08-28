@@ -80,12 +80,37 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Continue Learning */}
+        {/* Continue Learning / Up Next */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Continue Learning</h2>
-            <Link to="/my-courses" className={styles.seeAll}>View all →</Link>
+            <h2 className={styles.sectionTitle}>Up Next in Your Masterclass</h2>
+            <Link to="/my-courses" className={styles.seeAll}>All Programs →</Link>
           </div>
+
+          {/* Quick Resume Hero Card */}
+          {enrolledCourses.length > 0 && (
+            <div style={{ background: '#0B1116', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 'var(--radius-xl)', padding: '24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(6,182,212,0.1)' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', minWidth: 280 }}>
+                <div style={{ width: 100, height: 65, borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                  <img src={enrolledCourses[0].thumbnail} alt={enrolledCourses[0].title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#06B6D4"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase' }}>Module 1: Unit Economics</span>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', margin: '2px 0 4px' }}>The ROAS & MER Calculator</h3>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', margin: 0 }}>24m duration • 35% completed</p>
+                </div>
+              </div>
+
+              <Link to={`/course/${enrolledCourses[0].id}/learn`}>
+                <Button variant="primary" size="md">
+                  ▶ Resume Watching
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {enrollmentsLoading ? (
             <div className={styles.loadingText}>Loading your programs…</div>
@@ -104,10 +129,54 @@ export default function Dashboard() {
           )}
         </section>
 
+        {/* Student Toolkit & Mastermind Section */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', margin: '36px 0' }}>
+          {/* Live Q&A & Coaching Card */}
+          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#EF4444', display: 'inline-block', boxShadow: '0 0 8px #EF4444' }} />
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', margin: 0 }}>Next Live Office Hours & Account Audit</h3>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 16px' }}>
+              Bring your active Meta & Google ad campaigns for live teardowns and scaling troubleshooting with Devon Vance.
+            </p>
+            <div style={{ background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-dark)' }}>Thursday @ 8:00 PM EST</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Zoom Live Mastermind (Cohort #14)</div>
+              </div>
+              <span style={{ fontSize: '0.72rem', background: 'var(--primary-bg)', color: 'var(--primary)', padding: '4px 8px', borderRadius: 4, fontWeight: 700 }}>
+                Calendar Added
+              </span>
+            </div>
+          </div>
+
+          {/* Student Resource Vault */}
+          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 12px' }}>
+              📦 Student Resource Vault (Direct Access)
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <a href="#sop" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.8125rem', transition: 'border-color 0.2s' }}>
+                <span>📑 25+ Notion Media Buying SOPs</span>
+                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Open →</span>
+              </a>
+              <a href="#roas" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.8125rem', transition: 'border-color 0.2s' }}>
+                <span>📊 ROAS & Break-Even MER Calculator</span>
+                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Open →</span>
+              </a>
+              <a href="#discord" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.8125rem', transition: 'border-color 0.2s' }}>
+                <span>💬 Private Student Mastermind Discord</span>
+                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Join →</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Recent Activity */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Recent Activity</h2>
+            <h2 className={styles.sectionTitle}>Recent Activity & Study Log</h2>
           </div>
 
           <div className={styles.activityList}>

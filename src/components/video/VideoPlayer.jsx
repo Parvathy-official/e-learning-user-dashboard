@@ -19,6 +19,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
   const [muted, setMuted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [buffered, setBuffered] = useState(0);
   const controlsTimer = useRef(null);
 
@@ -35,7 +36,31 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
     return () => clearTimeout(controlsTimer.current);
   }, []);
 
-  // Disable right-click on video container (deterrent only)
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        skipTime(10);
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        skipTime(-10);
+      } else if (e.code === 'KeyF') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.code === 'KeyM') {
+        e.preventDefault();
+        toggleMute();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [playing, muted]);
+
   const handleContextMenu = (e) => e.preventDefault();
 
   const togglePlay = () => {
@@ -43,6 +68,19 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
     if (!v) return;
     if (v.paused) { v.play(); setPlaying(true); }
     else { v.pause(); setPlaying(false); }
+  };
+
+  const skipTime = (seconds) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = Math.min(Math.max(0, v.currentTime + seconds), v.duration || 0);
+  };
+
+  const changeSpeed = (speed) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = speed;
+    setPlaybackSpeed(speed);
   };
 
   const handleTimeUpdate = () => {
@@ -57,7 +95,10 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
 
   const handleLoadedMetadata = () => {
     const v = videoRef.current;
-    if (v) setDuration(v.duration);
+    if (v) {
+      setDuration(v.duration);
+      v.playbackRate = playbackSpeed;
+    }
   };
 
   const handleEnded = () => {
@@ -142,7 +183,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
         playsInline
       />
 
-      {/* Watermark — user email as deterrent */}
+      {/* Watermark */}
       {currentUser && (
         <div className={styles.watermark} aria-hidden="true">
           {currentUser.email}
@@ -153,7 +194,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
       <div className={styles.clickOverlay} onClick={togglePlay}>
         {!playing && (
           <div className={styles.playBtn} aria-label="Play">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#030708">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
           </div>
@@ -190,6 +231,18 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
               )}
             </button>
 
+            {/* 10s skip buttons */}
+            <button className={styles.ctrlBtn} onClick={() => skipTime(-10)} aria-label="Rewind 10s" title="Rewind 10s (←)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+            </button>
+            <button className={styles.ctrlBtn} onClick={() => skipTime(10)} aria-label="Forward 10s" title="Forward 10s (→)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </button>
+
             <div className={styles.volumeWrap}>
               <button className={styles.ctrlBtn} onClick={toggleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
                 {muted || volume === 0 ? (
@@ -203,7 +256,21 @@ export default function VideoPlayer({ videoUrl, lessonTitle, onEnded, onTimeUpda
           </div>
 
           <div className={styles.rightControls}>
-            <button className={styles.ctrlBtn} onClick={toggleFullscreen} aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+            {/* Speed Selector */}
+            <div className={styles.speedWrap}>
+              {[1, 1.25, 1.5, 2].map((s) => (
+                <button
+                  key={s}
+                  className={[styles.speedBtn, playbackSpeed === s ? styles.speedActive : ''].join(' ')}
+                  onClick={() => changeSpeed(s)}
+                  aria-label={`Playback speed ${s}x`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+
+            <button className={styles.ctrlBtn} onClick={toggleFullscreen} aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} title="Fullscreen (f)">
               {fullscreen ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3"/></svg>
               ) : (

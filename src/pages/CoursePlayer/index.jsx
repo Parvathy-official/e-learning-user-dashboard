@@ -181,6 +181,50 @@ export default function CoursePlayer() {
     })),
   })) || [];
 
+  const [activeTab, setActiveTab] = useState('overview');
+  const [qaInput, setQaInput] = useState('');
+  const [qaList, setQaList] = useState([
+    {
+      id: 'q1',
+      author: 'Vikram Singh',
+      role: 'Growth Lead @ E-Com Brand',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
+      time: '2 days ago',
+      question: 'When setting up the Dynamic Creative Testing sandbox, what budget split do you recommend relative to the main CBO scaling campaign?',
+      answer: 'Great question! We typically allocate 15% to 20% of your daily budget to the DCT Sandbox. Once a winning creative angle produces 3+ purchases at or below target CPA, graduate the Post ID directly into your scaling CBO.',
+      instructor: 'Devon Vance',
+    },
+    {
+      id: 'q2',
+      author: 'Sophia Chen',
+      role: 'Media Buyer',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
+      time: '5 days ago',
+      question: 'How do you prevent ASC campaigns from retargeting existing customers too heavily?',
+      answer: 'Set an Existing Customer Budget Cap of 0% to 5% inside the Advantage+ Shopping settings. Always define your 180-day customer audience list in your Account Custom Audiences tab.',
+      instructor: 'Devon Vance',
+    },
+  ]);
+
+  const handlePostQuestion = (e) => {
+    e.preventDefault();
+    if (!qaInput.trim()) return;
+    setQaList([
+      {
+        id: `q-${Date.now()}`,
+        author: currentUser?.name || 'Student',
+        role: 'Cohort Member',
+        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
+        time: 'Just now',
+        question: qaInput.trim(),
+        answer: null,
+      },
+      ...qaList,
+    ]);
+    setQaInput('');
+    toast.success('Question submitted to the instructor!');
+  };
+
   return (
     <div className={styles.page}>
       {/* Top bar */}
@@ -192,18 +236,24 @@ export default function CoursePlayer() {
           <span className={styles.backText}>{course.title}</span>
         </button>
 
-        {/* Mobile sidebar toggle */}
-        <button
-          className={styles.sidebarToggle}
-          onClick={() => setSidebarOpen((o) => !o)}
-          aria-label="Toggle curriculum"
-          aria-expanded={sidebarOpen}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-          Curriculum
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-bg)', padding: '4px 10px', borderRadius: 9999, border: '1px solid rgba(6,182,212,0.25)' }}>
+            🔥 3-Day Learning Streak
+          </span>
+
+          {/* Mobile sidebar toggle */}
+          <button
+            className={styles.sidebarToggle}
+            onClick={() => setSidebarOpen((o) => !o)}
+            aria-label="Toggle curriculum"
+            aria-expanded={sidebarOpen}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+            Curriculum
+          </button>
+        </div>
       </div>
 
       {/* Main layout */}
@@ -228,7 +278,7 @@ export default function CoursePlayer() {
             <div className={styles.lessonInfo}>
               <p className={styles.lessonTitle}>{currentLesson?.title}</p>
               <p className={styles.lessonProgress}>
-                Lesson {currentIdx + 1} of {allLessons.length}
+                Lesson {currentIdx + 1} of {allLessons.length} • {currentLesson?.duration}
               </p>
             </div>
 
@@ -262,6 +312,174 @@ export default function CoursePlayer() {
               >
                 Next
               </Button>
+            </div>
+          </div>
+
+          {/* Learning Platform Tabs */}
+          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: '#080D12' }}>
+              <button
+                onClick={() => setActiveTab('overview')}
+                style={{
+                  padding: '14px 20px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: activeTab === 'overview' ? '2px solid var(--primary)' : '2px solid transparent',
+                  color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                }}
+              >
+                📑 Overview & SOPs
+              </button>
+              <button
+                onClick={() => setActiveTab('downloads')}
+                style={{
+                  padding: '14px 20px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: activeTab === 'downloads' ? '2px solid var(--primary)' : '2px solid transparent',
+                  color: activeTab === 'downloads' ? 'var(--primary)' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                }}
+              >
+                📥 Toolkits & Templates (3)
+              </button>
+              <button
+                onClick={() => setActiveTab('qa')}
+                style={{
+                  padding: '14px 20px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: activeTab === 'qa' ? '2px solid var(--primary)' : '2px solid transparent',
+                  color: activeTab === 'qa' ? 'var(--primary)' : 'var(--text-secondary)',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                }}
+              >
+                💬 Student Q&A ({qaList.length})
+              </button>
+            </div>
+
+            <div style={{ padding: '24px' }}>
+              {activeTab === 'overview' && (
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 12px' }}>
+                    Lesson Core Takeaways & Implementation Checklist
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 16 }}>
+                    In this lesson, you will learn the exact framework used to test creatives, set bid caps, and avoid learning phase resets when scaling ad spend.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: '#080D12', padding: '16px 20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
+                      <span>Establish true break-even CAC before setting campaign bid strategies.</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
+                      <span>Separate Creative Testing Sandboxes (DCT ABO) from the Main Scaling CBO.</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                      <span style={{ color: 'var(--primary)', fontWeight: 800 }}>✓</span>
+                      <span>Ensure Server-Side CAPI Event Match Quality is 8.2 or higher in Meta Events Manager.</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'downloads' && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>📄 Notion Scale SOP</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>DCT Testing & Scaling Protocol</div>
+                    </div>
+                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded SOP template!')}>
+                      Download
+                    </button>
+                  </div>
+
+                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>📊 ROAS Calculator (Excel)</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>MER & LTV Sensitivity Model</div>
+                    </div>
+                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded ROAS Model!')}>
+                      Download
+                    </button>
+                  </div>
+
+                  <div style={{ padding: '16px', background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-dark)', fontSize: '0.875rem' }}>🎬 UGC Brief Swipe File</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>15 High-Converting Hook Scripts</div>
+                    </div>
+                    <button style={{ padding: '6px 12px', background: 'var(--primary-bg)', color: 'var(--primary)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, fontWeight: 600, fontSize: '0.78rem', cursor: 'pointer' }} onClick={() => toast.success('Downloaded UGC Briefs!')}>
+                      Download
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'qa' && (
+                <div>
+                  <form onSubmit={handlePostQuestion} style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+                    <input
+                      type="text"
+                      value={qaInput}
+                      onChange={(e) => setQaInput(e.target.value)}
+                      placeholder="Ask the instructor a question about this lesson…"
+                      style={{
+                        flex: 1,
+                        background: '#080D12',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '10px 14px',
+                        color: 'var(--text-dark)',
+                        fontSize: '0.875rem',
+                        outline: 'none',
+                      }}
+                    />
+                    <Button variant="primary" size="sm" type="submit">
+                      Post Question
+                    </Button>
+                  </form>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {qaList.map((q) => (
+                      <div key={q.id} style={{ background: '#080D12', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                          <img src={q.avatar} alt={q.author} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+                          <div>
+                            <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-dark)' }}>{q.author}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginLeft: 8 }}>{q.time}</span>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>
+                          {q.question}
+                        </p>
+
+                        {q.answer && (
+                          <div style={{ background: 'rgba(6,182,212,0.06)', borderLeft: '3px solid var(--primary)', padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span>Instructor Response — {q.instructor}</span>
+                              <span style={{ background: 'var(--primary)', color: '#030708', fontSize: '0.65rem', padding: '1px 5px', borderRadius: 4, fontWeight: 800 }}>VERIFIED</span>
+                            </div>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, lineHeight: 1.5 }}>
+                              {q.answer}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -35,7 +35,7 @@ export default function CourseCard({ course }) {
         <img src={thumbnail} alt={title} className={styles.thumb} loading="lazy" />
         {is_bestseller && (
           <div className={styles.bestsellerBadge}>
-            <Badge variant="bestseller">⭐ Bestseller</Badge>
+            <Badge variant="bestseller">⭐ Flagship Masterclass</Badge>
           </div>
         )}
         {discount > 0 && (
@@ -55,7 +55,7 @@ export default function CourseCard({ course }) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
           </svg>
-          {instructor}
+          {instructor} • <span style={{ color: 'var(--primary)', fontWeight: 600 }}>$35M+ Verified</span>
         </p>
 
         <div className={styles.meta}>
@@ -85,6 +85,18 @@ export default function CourseCard({ course }) {
           )}
         </div>
 
+        <div style={{ display: 'flex', gap: 6, margin: '6px 0 12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', background: '#080D12', padding: '2px 8px', borderRadius: 4, border: '1px solid var(--border)' }}>
+            📁 25+ SOPs
+          </span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', background: '#080D12', padding: '2px 8px', borderRadius: 4, border: '1px solid var(--border)' }}>
+            📜 Certificate
+          </span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', background: '#080D12', padding: '2px 8px', borderRadius: 4, border: '1px solid var(--border)' }}>
+            💬 Live Q&A
+          </span>
+        </div>
+
         <div className={styles.priceRow}>
           <div className={styles.prices}>
             <span className={styles.currentPrice}>{formatPrice(discounted_price || price)}</span>
@@ -92,7 +104,7 @@ export default function CourseCard({ course }) {
               <span className={styles.originalPrice}>{formatPrice(price)}</span>
             )}
           </div>
-          <span className={styles.cta}>View Course →</span>
+          <span className={styles.cta}>Explore Syllabus & Enroll →</span>
         </div>
       </div>
     </Link>
