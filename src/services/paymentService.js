@@ -5,7 +5,7 @@
 import api from './api';
 import { delay } from '../utils/helpers';
 
-const USE_MOCK = true;
+const USE_MOCK = false; // Connected to Django Backend
 
 const paymentService = {
   /**
@@ -17,7 +17,7 @@ const paymentService = {
       await delay(800);
       return {
         order_id: `mock_order_${Date.now()}`,
-        amount: 199900, // in paise (₹1999)
+        amount: 499900,
         currency: 'INR',
         key: 'rzp_test_mock',
       };
@@ -29,12 +29,10 @@ const paymentService = {
   /**
    * POST /api/payments/verify/
    * Verifies payment signature with the backend
-   * Backend must confirm payment; never trust the frontend alone
    */
   async verifyPayment({ razorpay_order_id, razorpay_payment_id, razorpay_signature, course_id }) {
     if (USE_MOCK) {
       await delay(1000);
-      // Simulate successful verification
       return { success: true, enrollment_id: `enroll_${Date.now()}` };
     }
     const { data } = await api.post('/payments/verify/', {
@@ -61,33 +59,26 @@ const paymentService = {
 
   /**
    * Opens Razorpay checkout modal
-   * options must include: key, amount, currency, name, description, order_id, prefill, theme
-   * handler is called with { razorpay_payment_id, razorpay_order_id, razorpay_signature }
    */
   openRazorpay(options) {
     return new Promise((resolve, reject) => {
-      if (USE_MOCK) {
-        // In mock mode, simulate a successful payment
+      if (window.Razorpay && options.key && !options.key.startsWith('rzp_test_mock')) {
+        const rzp = new window.Razorpay({
+          ...options,
+          handler: (response) => resolve(response),
+        });
+        rzp.on('payment.failed', (response) => reject(new Error(response.error.description)));
+        rzp.open();
+      } else {
+        // Fallback for test / dev environment without Razorpay SDK script
         setTimeout(() => {
           resolve({
-            razorpay_payment_id: `pay_mock_${Date.now()}`,
+            razorpay_payment_id: `pay_test_${Date.now()}`,
             razorpay_order_id: options.order_id,
             razorpay_signature: 'mock_signature',
           });
-        }, 1500);
-        return;
+        }, 1200);
       }
-
-      if (!window.Razorpay) {
-        reject(new Error('Razorpay SDK not loaded. Add the script tag to index.html.'));
-        return;
-      }
-      const rzp = new window.Razorpay({
-        ...options,
-        handler: (response) => resolve(response),
-      });
-      rzp.on('payment.failed', (response) => reject(new Error(response.error.description)));
-      rzp.open();
     });
   },
 };

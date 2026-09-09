@@ -66,16 +66,8 @@ export function CourseProvider({ children }) {
     setEnrollmentsLoading(true);
     try {
       const data = await courseService.getMyEnrollments();
-      if (data && data.length > 0) {
-        setEnrollments((prev) => {
-          const merged = [...prev];
-          data.forEach((d) => {
-            if (!merged.some((m) => String(m.course_id) === String(d.course_id))) {
-              merged.push(d);
-            }
-          });
-          return merged;
-        });
+      if (Array.isArray(data)) {
+        setEnrollments(data);
       }
       return data;
     } catch {
@@ -86,18 +78,32 @@ export function CourseProvider({ children }) {
   }, []);
 
   const isEnrolled = useCallback(
-    (courseId) => enrollments.some((e) => e.course_id === courseId),
+    (courseId) =>
+      enrollments.some(
+        (e) =>
+          String(e.course_id) === String(courseId) ||
+          String(e.course?.id) === String(courseId)
+      ),
     [enrollments]
   );
 
   const getEnrollment = useCallback(
-    (courseId) => enrollments.find((e) => e.course_id === courseId) || null,
+    (courseId) =>
+      enrollments.find(
+        (e) =>
+          String(e.course_id) === String(courseId) ||
+          String(e.course?.id) === String(courseId)
+      ) || null,
     [enrollments]
   );
 
   const addEnrollment = useCallback((enrollment) => {
     setEnrollments((prev) => {
-      const exists = prev.some((e) => e.course_id === enrollment.course_id);
+      const exists = prev.some(
+        (e) =>
+          String(e.course_id) === String(enrollment.course_id) ||
+          String(e.course?.id) === String(enrollment.course?.id)
+      );
       if (exists) return prev;
       return [...prev, enrollment];
     });

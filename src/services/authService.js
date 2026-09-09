@@ -6,7 +6,7 @@ import api from './api';
 import { delay } from '../utils/helpers';
 import { MOCK_USER } from '../utils/mockData';
 
-const USE_MOCK = true; // Set to false when backend is ready
+const USE_MOCK = false; // Connected to Django Backend
 
 const authService = {
   /**

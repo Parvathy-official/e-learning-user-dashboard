@@ -34,7 +34,7 @@
   border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
 }
-.logoText { font-size: 1.125rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.03em; }
+.logoText { font-size: 1.125rem; font-weight: 900; color: var(--text-dark); letter-spacing: -0.03em; }
 
 .header { text-align: center; margin-bottom: var(--space-5); }
 .title { font-size: 1.5rem; margin: 0 0 8px; }
@@ -62,7 +62,7 @@
 }
 .strengthLabel {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   transition: color 0.3s;
 }
@@ -73,7 +73,7 @@
   color: var(--text-tertiary);
   margin: var(--space-4) 0 0;
 }
-.termsLink { color: var(--primary); font-weight: 500; text-decoration: none; }
+.termsLink { color: var(--primary); font-weight: 700; text-decoration: none; }
 .termsLink:hover { text-decoration: underline; }
 
 .switchText {
@@ -82,5 +82,5 @@
   color: var(--text-secondary);
   margin: var(--space-4) 0 0;
 }
-.switchLink { color: var(--primary); font-weight: 600; text-decoration: none; }
+.switchLink { color: var(--primary); font-weight: 700; text-decoration: none; }
 .switchLink:hover { text-decoration: underline; }

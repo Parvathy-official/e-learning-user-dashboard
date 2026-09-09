@@ -6,7 +6,7 @@ import api from './api';
 import { delay } from '../utils/helpers';
 import { MOCK_COURSES, MOCK_ENROLLMENTS } from '../utils/mockData';
 
-const USE_MOCK = true;
+const USE_MOCK = false; // Connected to Django Backend
 
 const courseService = {
   /**

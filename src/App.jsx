@@ -21,7 +21,7 @@ export default function App() {
             toastOptions={{
               duration: 4000,
               style: {
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Lato', sans-serif",
                 fontSize: '0.875rem',
                 borderRadius: '10px',
                 background: '#0B1116',

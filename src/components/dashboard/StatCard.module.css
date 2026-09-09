@@ -29,6 +29,6 @@
 .error { background: var(--error-bg); color: var(--error); }
 
 .content { flex: 1; min-width: 0; }
-.label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; margin: 0 0 4px; }
-.value { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); margin: 0; letter-spacing: -0.03em; }
+.label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 700; margin: 0 0 4px; }
+.value { font-size: 1.5rem; font-weight: 900; color: var(--text-dark); margin: 0; letter-spacing: -0.03em; }
 .sub { font-size: 0.75rem; color: var(--text-tertiary); margin: 2px 0 0; }
