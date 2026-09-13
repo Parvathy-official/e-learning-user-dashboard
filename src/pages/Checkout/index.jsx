@@ -17,7 +17,7 @@ import styles from './Checkout.module.css';
 export default function Checkout() {
   const { courseId } = useParams();
   const validId = courseId || '1';
-  const { currentUser, updateUser } = useAuth();
+  const { currentUser, updateUser, isAuthenticated } = useAuth();
   const { addEnrollment, addPurchase } = useCourseContext();
   const navigate = useNavigate();
 
@@ -25,10 +25,15 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
 
-  // Guest checkout inputs
+  // Buyer details
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (currentUser?.name && !name) setName(currentUser.name);
+    if (currentUser?.email && !email) setEmail(currentUser.email);
+  }, [currentUser]);
 
   useEffect(() => {
     courseService
@@ -45,6 +50,12 @@ export default function Checkout() {
 
   const handlePayment = async (e) => {
     if (e) e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast('Please log in to complete your checkout.', { icon: '🔒' });
+      navigate('/login', { state: { from: { pathname: `/checkout/${validId}` } } });
+      return;
+    }
 
     if (!name.trim() || !email.trim()) {
       toast.error('Please enter your Name and Email Address.');
@@ -70,27 +81,17 @@ export default function Checkout() {
       if (updateUser) updateUser(buyerData);
       localStorage.setItem('user', JSON.stringify(buyerData));
 
-      // Step 1: Create order (mock or backend)
-      let order;
-      try {
-        order = await paymentService.createOrder(validId);
-      } catch {
-        order = {
-          order_id: `ord_${Date.now()}`,
-          amount: 49900,
-          currency: 'INR',
-          key: 'rzp_test_mock',
-        };
-      }
+      // Step 1: Create order on backend
+      const order = await paymentService.createOrder(validId);
 
-      // Step 2: Open payment modal or instant confirmation
+      // Step 2: Open payment modal
       const paymentResult = await paymentService.openRazorpay({
-        key: order?.key || 'rzp_test_mock',
-        amount: order?.amount || 49900,
+        key: order?.key,
+        amount: order?.amount,
         currency: order?.currency || 'INR',
         name: 'DigitalProduct.AI',
         description: course?.title || 'Create & Sell Your First Digital Product With AI',
-        order_id: order?.order_id || `ord_${Date.now()}`,
+        order_id: order?.order_id,
         prefill: { name: buyerData.name, email: buyerData.email, contact: phone },
         theme: { color: '#06B6D4' },
       });

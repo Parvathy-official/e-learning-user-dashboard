@@ -8,6 +8,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../pages/Home';
 import CourseDetails from '../pages/CourseDetails';
 import NotFound from '../pages/NotFound';
+import Login from '../pages/Login';
+import Signup from '../pages/Signup';
 
 // Session & Checkout pages
 import MyCourses from '../pages/MyCourses';
@@ -24,9 +26,9 @@ export default function AppRoutes() {
       <Route path="/courses" element={<Navigate to="/" replace />} />
       <Route path="/courses/:id" element={<CourseDetails />} />
 
-      {/* ── Auth Redirects (Login Removed) ── */}
-      <Route path="/login" element={<Navigate to="/" replace />} />
-      <Route path="/signup" element={<Navigate to="/" replace />} />
+      {/* ── Auth Routes ── */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
       {/* ── Instant Learning & Session Access ── */}
       <Route path="/my-learning" element={<MyCourses />} />
