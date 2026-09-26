@@ -9,9 +9,57 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './VideoPlayer.module.css';
 
+function parseVideoSource(url) {
+  if (!url) return { type: 'none' };
+  const cleanUrl = String(url).trim();
+
+  // 1. YouTube
+  const ytMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      type: 'youtube',
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0&modestbranding=1`,
+    };
+  }
+
+  // 2. Vimeo
+  const vimeoMatch = cleanUrl.match(/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)/i);
+  if (vimeoMatch && vimeoMatch[3]) {
+    return {
+      type: 'vimeo',
+      embedUrl: `https://player.vimeo.com/video/${vimeoMatch[3]}?autoplay=1&title=0&byline=0`,
+    };
+  }
+
+  // 3. Loom
+  const loomMatch = cleanUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/i);
+  if (loomMatch && loomMatch[1]) {
+    return {
+      type: 'loom',
+      embedUrl: `https://www.loom.com/embed/${loomMatch[1]}`,
+    };
+  }
+
+  // 4. Google Drive
+  const driveMatch = cleanUrl.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  if (driveMatch && driveMatch[1]) {
+    return {
+      type: 'drive',
+      embedUrl: `https://drive.google.com/file/d/${driveMatch[1]}/preview`,
+    };
+  }
+
+  // 5. Default direct HTML5 stream
+  return {
+    type: 'html5',
+    url: cleanUrl,
+  };
+}
+
 export default function VideoPlayer({ videoUrl, src, lessonTitle, title, initialTime = 0, onEnded, onTimeUpdate }) {
   const activeVideoUrl = videoUrl || src;
   const activeTitle = lessonTitle || title;
+  const videoSource = parseVideoSource(activeVideoUrl);
   const videoRef = useRef(null);
   const { currentUser } = useAuth();
   const [playing, setPlaying] = useState(false);
@@ -171,6 +219,26 @@ export default function VideoPlayer({ videoUrl, src, lessonTitle, title, initial
           </svg>
         </div>
         <p className={styles.placeholderText}>Select a lesson to start watching</p>
+      </div>
+    );
+  }
+
+  // Embeddable Iframe Providers (YouTube / Vimeo / Loom / Google Drive)
+  if (videoSource.type !== 'html5' && videoSource.embedUrl) {
+    return (
+      <div className={styles.container} onContextMenu={handleContextMenu}>
+        <iframe
+          src={videoSource.embedUrl}
+          title={activeTitle || 'Lesson Video'}
+          style={{ width: '100%', height: '100%', border: 'none', minHeight: '480px' }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+        {currentUser && (
+          <div className={styles.watermark} aria-hidden="true">
+            {currentUser.email}
+          </div>
+        )}
       </div>
     );
   }
