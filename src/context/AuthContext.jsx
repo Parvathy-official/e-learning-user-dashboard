@@ -67,6 +67,26 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  const requestOtp = useCallback(async (email) => {
+    return await authService.requestOtp(email);
+  }, []);
+
+  const verifyOtp = useCallback(async ({ email, otp }) => {
+    const data = await authService.verifyOtp({ email, otp });
+    if (data.access) {
+      localStorage.setItem('access_token', data.access);
+    }
+    if (data.refresh) {
+      localStorage.setItem('refresh_token', data.refresh);
+    }
+    if (data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setCurrentUser(data.user);
+      setIsAuthenticated(true);
+    }
+    return data;
+  }, []);
+
   const logout = useCallback(async () => {
     await authService.logout().catch(() => {});
     clearAuthStorage();
@@ -74,10 +94,23 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
   }, [clearAuthStorage]);
 
+  const setAuthSession = useCallback(({ user, access, refresh }) => {
+    if (access) localStorage.setItem('access_token', access);
+    if (refresh) localStorage.setItem('refresh_token', refresh);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const updateUser = useCallback((userData) => {
     setCurrentUser((prev) => {
       const updated = { ...prev, ...userData };
       localStorage.setItem('user', JSON.stringify(updated));
+      if (updated && updated.email) {
+        setIsAuthenticated(true);
+      }
       return updated;
     });
   }, []);
@@ -88,11 +121,15 @@ export function AuthProvider({ children }) {
     loading,
     login,
     signup,
+    requestOtp,
+    verifyOtp,
     logout,
     updateUser,
+    setAuthSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
 }
 
 export default AuthContext;

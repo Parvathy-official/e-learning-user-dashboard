@@ -17,7 +17,7 @@ import styles from './Checkout.module.css';
 export default function Checkout() {
   const { courseId } = useParams();
   const validId = courseId || '1';
-  const { currentUser, updateUser, isAuthenticated } = useAuth();
+  const { currentUser, updateUser, setAuthSession, isAuthenticated } = useAuth();
   const { addEnrollment, addPurchase } = useCourseContext();
   const navigate = useNavigate();
 
@@ -51,12 +51,6 @@ export default function Checkout() {
   const handlePayment = async (e) => {
     if (e) e.preventDefault();
 
-    if (!isAuthenticated) {
-      toast('Please log in to complete your checkout.', { icon: '🔒' });
-      navigate('/login', { state: { from: { pathname: `/checkout/${validId}` } } });
-      return;
-    }
-
     if (!name.trim() || !email.trim()) {
       toast.error('Please enter your Name and Email Address.');
       return;
@@ -76,13 +70,17 @@ export default function Checkout() {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
+        avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
       };
       if (updateUser) updateUser(buyerData);
       localStorage.setItem('user', JSON.stringify(buyerData));
 
-      // Step 1: Create order on backend
-      const order = await paymentService.createOrder(validId);
+      // Step 1: Create order on backend (Guest / Authenticated)
+      const order = await paymentService.createOrder(validId, {
+        name: buyerData.name,
+        email: buyerData.email,
+        phone: buyerData.phone,
+      });
 
       // Step 2: Open payment modal
       const paymentResult = await paymentService.openRazorpay({
@@ -96,21 +94,31 @@ export default function Checkout() {
         theme: { color: '#06B6D4' },
       });
 
-      // Step 3: Verify payment
-      let verification = { success: true };
-      try {
-        verification = await paymentService.verifyPayment({
-          razorpay_order_id: paymentResult.razorpay_order_id,
-          razorpay_payment_id: paymentResult.razorpay_payment_id,
-          razorpay_signature: paymentResult.razorpay_signature,
-          course_id: validId,
-        });
-      } catch {
-        verification = { success: true };
-      }
+      // Step 3: Verify payment server-side
+      const verification = await paymentService.verifyPayment({
+        razorpay_order_id: paymentResult.razorpay_order_id,
+        razorpay_payment_id: paymentResult.razorpay_payment_id,
+        razorpay_signature: paymentResult.razorpay_signature,
+        course_id: validId,
+      });
 
-      if (verification.success) {
-        const orderRef = `DP-${Date.now().toString().slice(-6)}`;
+      if (verification && verification.success) {
+        if (setAuthSession) {
+          setAuthSession({
+            user: verification.user,
+            access: verification.access,
+            refresh: verification.refresh,
+          });
+        } else {
+          if (verification.access) localStorage.setItem('access_token', verification.access);
+          if (verification.refresh) localStorage.setItem('refresh_token', verification.refresh);
+          if (verification.user) {
+            localStorage.setItem('user', JSON.stringify(verification.user));
+            if (updateUser) updateUser(verification.user);
+          }
+        }
+
+        const orderRef = paymentResult.razorpay_order_id || `DP-${Date.now().toString().slice(-6)}`;
         const finalPrice = course?.discounted_price || 499;
 
         // Step 4: Record purchase in context state
@@ -136,14 +144,16 @@ export default function Checkout() {
         toast.success('Instant Access Granted! Welcome to the Masterclass! 🎉');
         navigate(`/payment-success?course=${validId}&orderId=${orderRef}`);
       } else {
-        throw new Error('Payment verification failed');
+        throw new Error(verification?.error || 'Payment verification failed');
       }
     } catch (err) {
-      toast.error(err.message || 'Payment could not be completed. Please try again.');
+      const errMsg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Payment could not be completed. Please try again.';
+      toast.error(errMsg);
     } finally {
       setPaying(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -165,14 +175,6 @@ export default function Checkout() {
       <div className={['container', styles.layout].join(' ')}>
         {/* Left Column: Order Summary */}
         <div className={styles.summary}>
-          <div className={styles.pageHeader}>
-            <div className={styles.badgePill}>Instant 1-Step Checkout</div>
-            <h1 className={styles.heading}>Unlock Masterclass Access</h1>
-            <p className={styles.subheading}>
-              Get immediate lifetime access to the 3-Hour Practical AI Session and ready-to-use resources.
-            </p>
-          </div>
-
           <div className={styles.courseCard}>
             <img src={course.thumbnail} alt={course.title} className={styles.thumb} />
             <div className={styles.courseInfo}>

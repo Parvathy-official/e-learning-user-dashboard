@@ -40,6 +40,31 @@ const authService = {
   },
 
   /**
+   * POST /api/auth/request-otp/
+   */
+  async requestOtp(email) {
+    if (USE_MOCK) {
+      await delay(600);
+      return { success: true, message: 'Verification code sent to your email.' };
+    }
+    const { data } = await api.post('/auth/request-otp/', { email });
+    return data;
+  },
+
+  /**
+   * POST /api/auth/verify-otp/
+   */
+  async verifyOtp({ email, otp }) {
+    if (USE_MOCK) {
+      await delay(800);
+      const user = { ...MOCK_USER, email };
+      return { success: true, user, access: 'mock_access_token', refresh: 'mock_refresh_token' };
+    }
+    const { data } = await api.post('/auth/verify-otp/', { email, otp });
+    return data;
+  },
+
+  /**
    * POST /api/auth/logout/
    */
   async logout() {
@@ -65,3 +90,4 @@ const authService = {
 };
 
 export default authService;
+

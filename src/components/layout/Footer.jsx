@@ -62,10 +62,10 @@ export default function Footer() {
           <div className={styles.linkGroup}>
             <h4 className={styles.groupTitle}>Get Started</h4>
             <ul className={styles.linkList}>
+              <li><Link to="/my-learning" className={styles.link}>Student Access / My Courses</Link></li>
               <li><a href="#pricing" onClick={(e) => scrollToSection(e, 'pricing')} className={styles.link}>Instant Access — ₹499</a></li>
               <li><a href="#what-you-get" onClick={(e) => scrollToSection(e, 'what-you-get')} className={styles.link}>What You Get (AI Prompts & SOPs)</a></li>
               <li><a href="#faqs" onClick={(e) => scrollToSection(e, 'faqs')} className={styles.link}>Frequently Asked Questions</a></li>
-              <li><a href="#pricing" onClick={(e) => scrollToSection(e, 'pricing')} className={styles.link}>One-Time ₹499 Offer</a></li>
             </ul>
           </div>
         </div>

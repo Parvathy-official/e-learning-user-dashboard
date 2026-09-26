@@ -9,6 +9,7 @@ import { useCourseContext } from '../../hooks/useCourses';
 import courseService from '../../services/courseService';
 import VideoPlayer from '../../components/video/VideoPlayer';
 import CurriculumSidebar from '../../components/video/CurriculumSidebar';
+import PasswordlessAuthCard from '../../components/auth/PasswordlessAuthCard';
 import Button from '../../components/common/Button';
 import toast from 'react-hot-toast';
 import styles from './CoursePlayer.module.css';
@@ -16,7 +17,7 @@ import styles from './CoursePlayer.module.css';
 export default function CoursePlayer() {
   const { courseId, lessonId } = useParams();
   const { isAuthenticated, currentUser } = useAuth();
-  const { isEnrolled, enrollments, updateLessonProgress } = useCourseContext();
+  const { isEnrolled, enrollments, updateLessonProgress, fetchEnrollments } = useCourseContext();
   const navigate = useNavigate();
 
   const [course, setCourse] = useState(null);
@@ -32,12 +33,14 @@ export default function CoursePlayer() {
   const completedLessons = enrollment?.completed_lessons || [];
   const enrolled = isEnrolled(courseId);
 
-  // Load course data
+  // Load course and check backend access
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       setLoading(true);
       try {
         const data = await courseService.getCourseById(courseId);
+        if (!isMounted) return;
         setCourse(data);
 
         const allLessons = data.modules?.flatMap((m) => m.lessons) || [];
@@ -50,55 +53,90 @@ export default function CoursePlayer() {
           initial = allLessons[0];
         }
 
-        // Access check: If not enrolled and lesson is not preview, block access
-        if (!enrolled && !initial?.is_preview) {
+        // Preview lessons can be watched by anyone
+        if (initial?.is_preview) {
+          setCurrentLesson(initial);
+          setAccessDenied(false);
+          setLoading(false);
+          return;
+        }
+
+        // For protected lessons, check if user is authenticated and enrolled
+        if (!isAuthenticated) {
+          setLoading(false);
+          return;
+        }
+
+        // Check backend server-side authorization
+        const accessCheck = await courseService.checkCourseAccess(courseId);
+        if (!isMounted) return;
+
+        if (!accessCheck?.has_access && !enrolled) {
           setAccessDenied(true);
           setLoading(false);
           return;
         }
 
+        setAccessDenied(false);
         if (initial) setCurrentLesson(initial);
       } catch {
-        toast.error('Failed to load course');
+        if (!isMounted) return;
+        toast.error('Failed to load course details');
         navigate('/my-learning');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     load();
-  }, [courseId, lessonId, enrolled, enrollment?.last_watched_lesson, navigate]);
+    return () => { isMounted = false; };
+  }, [courseId, lessonId, enrolled, isAuthenticated, enrollment?.last_watched_lesson, navigate]);
 
-  // Fetch video URL when lesson changes
+  // Fetch signed video URL when lesson changes
   useEffect(() => {
     if (!currentLesson || accessDenied) return;
+    if (!currentLesson.is_preview && !isAuthenticated) return;
+
+    let isMounted = true;
     const fetchVideo = async () => {
       setVideoLoading(true);
       setVideoUrl(null);
       try {
         const data = await courseService.getVideoUrl(courseId, currentLesson.id);
-        setVideoUrl(data.url);
-      } catch {
-        toast.error('Failed to load lesson video');
+        if (isMounted) setVideoUrl(data.url);
+      } catch (err) {
+        if (isMounted) {
+          const errMsg = err?.response?.data?.error || 'Failed to load lesson video';
+          toast.error(errMsg);
+          if (err?.response?.status === 403 || err?.response?.status === 401) {
+            setAccessDenied(true);
+          }
+        }
       } finally {
-        setVideoLoading(false);
+        if (isMounted) setVideoLoading(false);
       }
     };
     fetchVideo();
-  }, [currentLesson, courseId, accessDenied]);
+    return () => { isMounted = false; };
+  }, [currentLesson, courseId, accessDenied, isAuthenticated]);
 
   const handleLessonSelect = useCallback((lesson) => {
     if (!enrolled && !lesson.is_preview) {
-      toast('Please purchase this course to unlock this lesson.', { icon: '🔒' });
+      if (!isAuthenticated) {
+        toast('Please verify your purchase email to unlock this lesson.', { icon: '🔒' });
+      } else {
+        toast('Please purchase this course to unlock this lesson.', { icon: '🔒' });
+      }
       return;
     }
     setCurrentLesson(lesson);
     navigate(`/course/${courseId}/learn/${lesson.id}`, { replace: true });
     setSidebarOpen(false);
-  }, [courseId, enrolled, navigate]);
+  }, [courseId, enrolled, isAuthenticated, navigate]);
 
   const handleMarkComplete = () => {
     if (!currentLesson) return;
     updateLessonProgress(courseId, currentLesson.id, 0, 0, true);
+    courseService.markLessonComplete(courseId, currentLesson.id).catch(() => {});
     toast.success(`Completed: ${currentLesson.title} ✓`);
   };
 
@@ -136,11 +174,31 @@ export default function CoursePlayer() {
     if (idx > 0) handleLessonSelect(allLessons[idx - 1]);
   };
 
+  const handleOtpVerified = () => {
+    fetchEnrollments();
+  };
+
   const allLessons = course?.modules?.flatMap((m) => m.lessons) || [];
   const currentIdx = allLessons.findIndex((l) => String(l.id) === String(currentLesson?.id));
   const isCurrentLessonComplete = currentLesson && completedLessons.includes(String(currentLesson.id));
 
-  // Access denied state
+  // 1. Unauthenticated Visitor attempting to access protected content
+  if (!loading && !isAuthenticated && currentLesson && !currentLesson.is_preview) {
+    return (
+      <div className={styles.accessDenied}>
+        <div style={{ width: '100%', maxWidth: '480px', margin: '0 auto' }}>
+          <PasswordlessAuthCard
+            title="Verify Purchase Email"
+            subtitle="This lesson is protected. Enter the email address you used during purchase to unlock instant access."
+            actionText="Verify & Unlock Player"
+            onSuccess={handleOtpVerified}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Access Denied State (Authenticated user who hasn't bought this course)
   if (!loading && accessDenied) {
     return (
       <div className={styles.accessDenied}>
@@ -152,20 +210,16 @@ export default function CoursePlayer() {
           </div>
           <h2 className={styles.accessTitle}>Course Enrollment Required</h2>
           <p className={styles.accessDesc}>
-            {!isAuthenticated
-              ? 'Please log in and purchase this course to access the lessons.'
-              : 'You have not enrolled in this course yet. Purchase once for lifetime access.'}
+            {currentUser?.email ? (
+              <>Your account (<strong>{currentUser.email}</strong>) has not purchased this course yet.</>
+            ) : (
+              <>You have not enrolled in this course yet. Purchase once for instant lifetime access.</>
+            )}
           </p>
           <div className={styles.accessActions}>
-            {!isAuthenticated ? (
-              <Button variant="primary" size="lg" onClick={() => navigate('/login', { state: { from: { pathname: `/checkout/${courseId}` } } })}>
-                Log In & Buy Course
-              </Button>
-            ) : (
-              <Button variant="primary" size="lg" onClick={() => navigate(`/checkout/${courseId}`)}>
-                Buy Course Now
-              </Button>
-            )}
+            <Button variant="primary" size="lg" onClick={() => navigate(`/checkout/${courseId}`)}>
+              Unlock Instant Access — ₹{course?.discounted_price || course?.price || 499}
+            </Button>
             <Button variant="outline" size="md" onClick={() => navigate(`/courses/${courseId}`)}>
               View Course Syllabus
             </Button>
@@ -229,109 +283,87 @@ export default function CoursePlayer() {
         </div>
       </div>
 
-      {/* Main Distraction-Free Layout */}
-      <div className={styles.layout}>
-        {/* Left Video Column */}
-        <div className={styles.videoCol}>
-          {videoLoading ? (
-            <div className={styles.videoPlaceholder}>
-              <div className={styles.spinner} aria-label="Loading video…" />
-            </div>
-          ) : (
-            <VideoPlayer
-              videoUrl={videoUrl}
-              lessonTitle={currentLesson?.title}
-              initialTime={enrollment?.last_position_seconds || 0}
-              onEnded={handleNext}
-              onTimeUpdate={handleTimeUpdate}
-            />
-          )}
-
-          {/* Lesson Controls */}
-          <div className={styles.lessonControls}>
-            <div className={styles.lessonInfo}>
-              <p className={styles.lessonTitle}>{currentLesson?.title}</p>
-              <p className={styles.lessonProgress}>
-                Lesson {currentIdx >= 0 ? currentIdx + 1 : 1} of {allLessons.length} • {currentLesson?.duration}
-              </p>
-            </div>
-
-            <div className={styles.navButtons}>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrev}
-                disabled={currentIdx <= 0}
-                leftIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>}
-              >
-                Previous
-              </Button>
-
-              <Button
-                variant={isCurrentLessonComplete ? 'primary' : 'outline'}
-                size="sm"
-                onClick={handleMarkComplete}
-                leftIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
-              >
-                {isCurrentLessonComplete ? '✓ Completed' : 'Mark as Complete'}
-              </Button>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleNext}
-                disabled={currentIdx >= allLessons.length - 1}
-                rightIcon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>}
-              >
-                Next Lesson
-              </Button>
-            </div>
+      {/* Main Player Grid */}
+      <div className={styles.mainGrid}>
+        {/* Left Video + Controls Column */}
+        <div className={styles.playerColumn}>
+          <div className={styles.videoWrapper}>
+            {videoLoading ? (
+              <div className={styles.videoLoading}>
+                <div className={styles.spinner} />
+                <p>Loading secure stream…</p>
+              </div>
+            ) : videoUrl ? (
+              <VideoPlayer
+                src={videoUrl}
+                title={currentLesson?.title || course.title}
+                onTimeUpdate={handleTimeUpdate}
+                onEnded={handleMarkComplete}
+              />
+            ) : (
+              <div className={styles.videoPlaceholder}>
+                <p>Select a lesson from the curriculum to start watching.</p>
+              </div>
+            )}
           </div>
 
-          {/* Lesson Description & Resources Card */}
-          <div style={{ background: '#0B1116', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '24px', marginTop: 20 }}>
-            <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: 'var(--text-dark)', margin: '0 0 8px' }}>
-              About this lesson
-            </h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: '0 0 16px' }}>
-              Follow along with the video, review the key points, and apply the frameworks in your own ad accounts. When finished, mark the lesson as complete or let automatic tracking mark it for you.
-            </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', background: '#080D12', padding: '6px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                ⏱️ Duration: {currentLesson?.duration}
-              </span>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-primary)', background: '#080D12', padding: '6px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                {isCurrentLessonComplete ? '✅ Status: Completed' : '⏳ Status: In Progress'}
-              </span>
+          {/* Lesson Metadata and Actions */}
+          <div className={styles.lessonMeta}>
+            <div className={styles.lessonInfo}>
+              <div className={styles.badgeRow}>
+                {currentLesson?.is_preview && <span className={styles.previewBadge}>Free Preview</span>}
+                <span className={styles.durationTag}>{currentLesson?.duration || '15 min'}</span>
+              </div>
+              <h1 className={styles.lessonTitle}>{currentLesson?.title || 'Course Lesson'}</h1>
+            </div>
+
+            <div className={styles.lessonControls}>
+              <button
+                className={[styles.completeBtn, isCurrentLessonComplete ? styles.completed : ''].filter(Boolean).join(' ')}
+                onClick={handleMarkComplete}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                {isCurrentLessonComplete ? 'Completed' : 'Mark as Complete'}
+              </button>
+
+              <div className={styles.navBtns}>
+                <button
+                  className={styles.navBtn}
+                  onClick={handlePrev}
+                  disabled={currentIdx <= 0}
+                  title="Previous Lesson"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <button
+                  className={styles.navBtn}
+                  onClick={handleNext}
+                  disabled={currentIdx >= allLessons.length - 1}
+                  title="Next Lesson"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Curriculum sidebar — desktop */}
-        <div className={styles.sidebarCol}>
+        {/* Right Sidebar: Curriculum */}
+        <div className={[styles.sidebarWrapper, sidebarOpen ? styles.sidebarVisible : ''].filter(Boolean).join(' ')}>
           <CurriculumSidebar
             modules={enrichedModules}
             currentLessonId={currentLesson?.id}
-            isEnrolled={enrolled}
-            onLessonSelect={handleLessonSelect}
+            onSelectLesson={handleLessonSelect}
+            onClose={() => setSidebarOpen(false)}
           />
         </div>
       </div>
-
-      {/* Mobile sidebar drawer */}
-      {sidebarOpen && (
-        <>
-          <div className={styles.drawerOverlay} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
-          <div className={styles.drawer} role="dialog" aria-label="Course curriculum">
-            <CurriculumSidebar
-              modules={enrichedModules}
-              currentLessonId={currentLesson?.id}
-              isEnrolled={enrolled}
-              onLessonSelect={handleLessonSelect}
-            />
-          </div>
-        </>
-      )}
     </div>
   );
 }

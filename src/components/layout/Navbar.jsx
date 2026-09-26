@@ -59,8 +59,12 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Action Button: Get Instant Access */}
+        {/* Action Buttons */}
         <div className={styles.actions}>
+          <Link to="/my-learning" className={styles.loginLink} id="nav-my-learning-link">
+            <span>Student Access</span>
+          </Link>
+
           <a
             href="#pricing"
             onClick={scrollToPricing}
@@ -76,4 +80,5 @@ export default function Navbar() {
     </nav>
   );
 }
+
 

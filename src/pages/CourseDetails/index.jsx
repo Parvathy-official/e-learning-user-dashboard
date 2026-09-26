@@ -44,11 +44,6 @@ export default function CourseDetails() {
   }, [id]);
 
   const handleCTA = () => {
-    if (!isAuthenticated) {
-      toast('Please log in to purchase and enroll in this course.', { icon: '🔒' });
-      navigate('/login', { state: { from: { pathname: `/checkout/${id}` } } });
-      return;
-    }
     if (enrolled) {
       navigate(`/course/${id}/learn`);
       return;
@@ -65,12 +60,6 @@ export default function CourseDetails() {
       setPreviewLesson(lesson);
       return;
     }
-    if (!isAuthenticated) {
-      toast('Please log in to purchase and access this lesson.', { icon: '🔒' });
-      navigate('/login', { state: { from: { pathname: `/checkout/${id}` } } });
-      return;
-    }
-    toast('Please enroll to unlock all lessons in this course.', { icon: '🔒' });
     navigate(`/checkout/${id}`);
   };
 

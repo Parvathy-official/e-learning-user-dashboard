@@ -11,8 +11,9 @@ const paymentService = {
   /**
    * POST /api/payments/create-order/
    * Creates a payment order on the backend (Razorpay order ID)
+   * Supports guest checkout by passing buyerData { name, email, phone }
    */
-  async createOrder(courseId) {
+  async createOrder(courseId, buyerData = {}) {
     if (USE_MOCK) {
       await delay(800);
       return {
@@ -22,7 +23,13 @@ const paymentService = {
         key: 'rzp_test_mock',
       };
     }
-    const { data } = await api.post('/payments/create-order/', { course_id: courseId });
+    const payload = {
+      course_id: courseId,
+      ...(buyerData.name ? { name: buyerData.name } : {}),
+      ...(buyerData.email ? { email: buyerData.email } : {}),
+      ...(buyerData.phone ? { phone: buyerData.phone } : {}),
+    };
+    const { data } = await api.post('/payments/create-order/', payload);
     return data;
   },
 
