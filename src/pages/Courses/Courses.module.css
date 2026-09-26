@@ -1,28 +1,66 @@
-.page { flex: 1; padding-bottom: var(--space-20); }
+/* =========================================================
+   Courses Catalog Page — Styles
+   ========================================================= */
 
-.pageHeader {
-  background: radial-gradient(ellipse at 50% 0%, #081721 0%, #030708 85%);
-  border-bottom: 1px solid var(--border);
-  padding: calc(var(--navbar-height) + 40px) 0 40px;
+.page {
+  padding-top: calc(var(--navbar-height, 70px) + 36px);
+  padding-bottom: 80px;
+  background: var(--bg);
+  min-height: 100vh;
 }
-.heading { margin: 0 0 8px; font-size: 2rem; }
-.sub { margin: 0; font-size: 1.0625rem; }
 
-.content { padding-top: var(--space-8); }
+.header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 40px;
+}
 
-/* Filters */
-.filters {
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Controls: Search and Filter */
+.controls {
   display: flex;
-  gap: var(--space-4);
-  margin-bottom: var(--space-5);
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 }
 
 .searchWrap {
-  flex: 1;
-  min-width: 240px;
   position: relative;
+  flex: 1;
+  min-width: 280px;
+  max-width: 480px;
 }
+
 .searchIcon {
   position: absolute;
   left: 14px;
@@ -31,81 +69,243 @@
   color: var(--text-tertiary);
   pointer-events: none;
 }
+
 .searchInput {
   width: 100%;
-  height: 44px;
-  padding: 0 14px 0 42px;
+  padding: 12px 16px 12px 42px;
+  background: #0B1116;
   border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-sans);
+  border-radius: var(--radius-lg);
+  color: #FFFFFF;
   font-size: 0.9375rem;
-  color: var(--text-dark);
-  background: #080D12;
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all var(--transition-fast);
 }
+
 .searchInput:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg), 0 0 15px rgba(6, 182, 212, 0.2);
-}
-.searchInput::placeholder { color: var(--text-tertiary); }
-
-.selectWrap { flex-shrink: 0; }
-.select {
-  height: 44px;
-  padding: 0 36px 0 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  color: var(--text-dark);
-  background: #080D12;
-  cursor: pointer;
   outline: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  transition: border-color var(--transition-fast);
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
 }
-.select:focus { border-color: var(--primary); }
 
-/* Category pills */
 .categories {
   display: flex;
-  gap: var(--space-2);
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: var(--space-6);
 }
-.catPill {
-  padding: 7px 16px;
-  border: 1.5px solid var(--border);
+
+.catBtn {
+  padding: 8px 16px;
+  background: #0B1116;
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 700;
   color: var(--text-secondary);
-  background: #080D12;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.catBtn:hover {
+  color: #FFFFFF;
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+.catBtnActive {
+  background: var(--primary);
+  color: #030708;
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.35);
+}
+
+/* Courses Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.courseCard {
+  background: #0B1116;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.courseCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(6, 182, 212, 0.15);
+}
+
+.thumbWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #070C10;
+  overflow: hidden;
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.courseCard:hover .thumb {
+  transform: scale(1.04);
+}
+
+.cardBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(3, 7, 8, 0.85);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  color: #22D3EE;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+}
+
+.cardBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+
+.cardTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.35;
+  margin-bottom: 8px;
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardTitle:hover {
+  color: var(--primary);
+}
+
+.cardDesc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.footerRow {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.priceWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.price {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.originalPrice {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.buyBtn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+  color: #030708;
+  font-size: 0.85rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  text-decoration: none;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
-.catPill:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--primary-bg);
-}
-.catActive {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #030708 !important;
-  font-weight: 700;
+
+.buyBtn:hover {
+  filter: brightness(1.1);
   box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
 }
 
-.resultCount {
-  font-size: 0.875rem;
-  color: var(--text-tertiary);
-  font-weight: 700;
-  margin: 0 0 var(--space-6);
+.resumeBtn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+}
+
+.resumeBtn:hover {
+  filter: brightness(1.1);
+}
+
+.detailsBtn {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.detailsBtn:hover {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

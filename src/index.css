@@ -82,7 +82,7 @@
   --transition-slow: 300ms ease;
 
   /* Layout */
-  --navbar-height: 0px;
+  --navbar-height: 70px;
   --max-width: 1200px;
   --sidebar-width: 340px;
 }

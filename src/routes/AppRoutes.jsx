@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Public pages
 import Home from '../pages/Home';
+import Courses from '../pages/Courses';
 import CourseDetails from '../pages/CourseDetails';
 import NotFound from '../pages/NotFound';
 import Login from '../pages/Login';
@@ -23,7 +24,7 @@ export default function AppRoutes() {
     <Routes>
       {/* ── Main Landing Page ── */}
       <Route path="/" element={<Home />} />
-      <Route path="/courses" element={<Navigate to="/" replace />} />
+      <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetails />} />
 
       {/* ── Auth Routes ── */}

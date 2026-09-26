@@ -60,6 +60,42 @@ export default function Navbar() {
           </div>
         </Link>
 
+        {/* Navigation Links */}
+        <div className={styles.navLinks}>
+          <Link
+            to="/"
+            className={[styles.navLink, location.pathname === '/' ? styles.navLinkActive : ''].join(' ')}
+          >
+            Home
+          </Link>
+          <Link
+            to="/courses"
+            className={[styles.navLink, location.pathname.startsWith('/courses') ? styles.navLinkActive : ''].join(' ')}
+            id="nav-all-courses-link"
+          >
+            All Courses
+          </Link>
+          <a
+            href="/#curriculum"
+            onClick={(e) => {
+              if (location.pathname === '/') {
+                e.preventDefault();
+                const el = document.getElementById('curriculum') || document.getElementById('modules');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className={styles.navLink}
+          >
+            Curriculum
+          </a>
+          <Link
+            to="/my-learning"
+            className={[styles.navLink, location.pathname.startsWith('/my-learning') ? styles.navLinkActive : ''].join(' ')}
+          >
+            My Learning
+          </Link>
+        </div>
+
         {/* Action Buttons */}
         <div className={styles.actions}>
           <Link to="/my-learning" className={styles.loginLink} id="nav-my-learning-link">
