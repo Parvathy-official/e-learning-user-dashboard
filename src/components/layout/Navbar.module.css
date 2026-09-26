@@ -129,6 +129,42 @@
   color: #000;
 }
 
+.resumeCtaBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  box-shadow: 0 0 22px rgba(16, 185, 129, 0.45);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+  white-space: nowrap;
+}
+
+.resumeCtaBtn:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.7);
+  filter: brightness(1.1);
+  color: #FFFFFF;
+}
+
+.playIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  font-size: 0.65rem;
+}
+
 .ctaPulse {
   width: 7px;
   height: 7px;

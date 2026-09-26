@@ -47,6 +47,19 @@ export function CourseProvider({ children }) {
     } catch {}
   }, [purchases]);
 
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      courseService.getMyEnrollments()
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setEnrollments(data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   const fetchCourses = useCallback(async (params = {}) => {
     setCoursesLoading(true);
     setCoursesError(null);

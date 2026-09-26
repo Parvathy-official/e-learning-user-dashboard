@@ -1,15 +1,16 @@
-// =========================================================
-//  Navbar Component — Flair Academy
-//  Clean, minimal header: Logo + "GET INSTANT ACCESS" CTA
-// =========================================================
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { useCourseContext } from '../../hooks/useCourses';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { currentUser, isAuthenticated } = useAuth();
+  const { isEnrolled } = useCourseContext();
+
+  const userHasAccess = isAuthenticated || isEnrolled('1');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -62,19 +63,30 @@ export default function Navbar() {
         {/* Action Buttons */}
         <div className={styles.actions}>
           <Link to="/my-learning" className={styles.loginLink} id="nav-my-learning-link">
-            <span>Student Access</span>
+            <span>{currentUser?.name ? `👤 ${currentUser.name.split(' ')[0]}` : 'Student Access'}</span>
           </Link>
 
-          <a
-            href="#pricing"
-            onClick={scrollToPricing}
-            className={styles.staticCtaBtn}
-            id="nav-instant-access-btn"
-          >
-            <span className={styles.ctaPulse} />
-            <span className={styles.ctaText}>GET INSTANT ACCESS</span>
-            <span className={styles.ctaPrice}>₹499</span>
-          </a>
+          {userHasAccess ? (
+            <Link
+              to="/course/1/learn"
+              className={styles.resumeCtaBtn}
+              id="nav-resume-learning-btn"
+            >
+              <span className={styles.playIcon}>▶</span>
+              <span>Resume Masterclass</span>
+            </Link>
+          ) : (
+            <a
+              href="#pricing"
+              onClick={scrollToPricing}
+              className={styles.staticCtaBtn}
+              id="nav-instant-access-btn"
+            >
+              <span className={styles.ctaPulse} />
+              <span className={styles.ctaText}>GET INSTANT ACCESS</span>
+              <span className={styles.ctaPrice}>₹499</span>
+            </a>
+          )}
         </div>
       </div>
     </nav>

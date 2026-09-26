@@ -5,12 +5,18 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { useCourseContext } from '../../hooks/useCourses';
 import { MOCK_COURSES } from '../../utils/mockData';
 import styles from './Home.module.css';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
+  const { isEnrolled } = useCourseContext();
   const course = MOCK_COURSES[0];
+
+  const userHasAccess = isAuthenticated || isEnrolled('1');
 
   // Accordion state for Modules
   const [openModule, setOpenModule] = useState(0);
@@ -22,7 +28,11 @@ export default function Home() {
   const [selectedResult, setSelectedResult] = useState(null);
 
   const handleInstantAccess = () => {
-    navigate('/checkout/1');
+    if (userHasAccess) {
+      navigate('/course/1/learn');
+    } else {
+      navigate('/checkout/1');
+    }
   };
 
   const scrollToPricing = (e) => {
@@ -125,6 +135,29 @@ export default function Home() {
       <section className={styles.hero} id="hero">
         <div className={styles.heroGlow} />
         <div className={['container', styles.heroContainer].join(' ')}>
+          {/* Enrolled Student Welcome Back Banner */}
+          {userHasAccess && (
+            <div className={styles.welcomeBackBanner} id="welcome-back-banner">
+              <div className={styles.welcomeBackLeft}>
+                <span className={styles.welcomeBadge}>⚡ Enrolled Student</span>
+                <p className={styles.welcomeText}>
+                  Welcome back, <strong>{currentUser?.name || currentUser?.email || 'Student'}</strong>! You have full lifetime access to this masterclass.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/course/1/learn')}
+                className={styles.resumeHeroBtn}
+                id="welcome-resume-btn"
+              >
+                <span>▶ Resume Masterclass</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            </div>
+          )}
+
           {/* Badge */}
           <div className={styles.pillBadge}>
             <span className={styles.pillDot} />
@@ -145,7 +178,7 @@ export default function Home() {
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') handleInstantAccess();
             }}
-            title="Click to get instant access"
+            title={userHasAccess ? 'Click to resume masterclass' : 'Click to get instant access'}
           >
             <img
               src="/workshop-banner.jpg"
@@ -170,17 +203,31 @@ export default function Home() {
               <span className={styles.heroPriceLabel}>— One-Time Payment</span>
             </div>
 
-            <button
-              className={styles.heroCtaBtn}
-              onClick={handleInstantAccess}
-              id="hero-get-access-btn"
-            >
-              <span>GET INSTANT ACCESS</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
+            {userHasAccess ? (
+              <button
+                className={styles.heroResumeBtn}
+                onClick={() => navigate('/course/1/learn')}
+                id="hero-resume-access-btn"
+              >
+                <span>▶ OPEN MASTERCLASS PLAYER</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                className={styles.heroCtaBtn}
+                onClick={handleInstantAccess}
+                id="hero-get-access-btn"
+              >
+                <span>GET INSTANT ACCESS</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Trust Guarantees */}
@@ -839,17 +886,32 @@ export default function Home() {
                 </div>
               </div>
 
-              <button
-                className={styles.pricingCtaBtn}
-                onClick={handleInstantAccess}
-                id="pricing-buy-btn"
-              >
-                <span>GET INSTANT ACCESS — ₹499</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
+              {userHasAccess ? (
+                <button
+                  className={styles.heroResumeBtn}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  onClick={() => navigate('/course/1/learn')}
+                  id="pricing-resume-btn"
+                >
+                  <span>▶ RESUME MASTERCLASS (ACTIVE ACCESS)</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  className={styles.pricingCtaBtn}
+                  onClick={handleInstantAccess}
+                  id="pricing-buy-btn"
+                >
+                  <span>GET INSTANT ACCESS — ₹499</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </button>
+              )}
 
               <div className={styles.pricingFeatures}>
                 <div className={styles.pricingFeature}>
@@ -951,17 +1013,31 @@ export default function Home() {
             </h3>
             <p className={styles.closingCardSession}>3-Hour Practical Session — ₹499</p>
 
-            <button
-              className={styles.closingCtaBtn}
-              onClick={handleInstantAccess}
-              id="closing-get-access-btn"
-            >
-              <span>GET INSTANT ACCESS NOW</span>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
+            {userHasAccess ? (
+              <button
+                className={styles.heroResumeBtn}
+                onClick={() => navigate('/course/1/learn')}
+                id="closing-resume-btn"
+              >
+                <span>▶ RESUME MASTERCLASS PLAYER</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                className={styles.closingCtaBtn}
+                onClick={handleInstantAccess}
+                id="closing-get-access-btn"
+              >
+                <span>GET INSTANT ACCESS NOW</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -983,17 +1059,31 @@ export default function Home() {
             </div>
           </div>
 
-          <button
-            className={styles.floatingCtaBtn}
-            onClick={handleInstantAccess}
-            id="floating-get-access-btn"
-          >
-            <span>GET INSTANT ACCESS</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </button>
+          {userHasAccess ? (
+            <button
+              className={styles.resumeHeroBtn}
+              onClick={() => navigate('/course/1/learn')}
+              id="floating-resume-btn"
+            >
+              <span>▶ Resume Masterclass</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className={styles.floatingCtaBtn}
+              onClick={handleInstantAccess}
+              id="floating-get-access-btn"
+            >
+              <span>GET INSTANT ACCESS</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          )}
         </div>
       </aside>
 

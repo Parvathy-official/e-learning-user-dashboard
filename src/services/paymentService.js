@@ -70,11 +70,29 @@ const paymentService = {
   openRazorpay(options) {
     return new Promise((resolve, reject) => {
       if (window.Razorpay && options.key && !options.key.startsWith('rzp_test_mock')) {
+        let isResolved = false;
         const rzp = new window.Razorpay({
           ...options,
-          handler: (response) => resolve(response),
+          handler: (response) => {
+            isResolved = true;
+            resolve(response);
+          },
+          modal: {
+            ondismiss: () => {
+              if (!isResolved) {
+                isResolved = true;
+                resolve({
+                  dismissed: true,
+                  order_id: options.order_id,
+                });
+              }
+            },
+          },
         });
-        rzp.on('payment.failed', (response) => reject(new Error(response.error.description)));
+        rzp.on('payment.failed', (response) => {
+          isResolved = true;
+          reject(new Error(response?.error?.description || 'Payment was unsuccessful'));
+        });
         rzp.open();
       } else {
         // Fallback for test / dev environment without Razorpay SDK script

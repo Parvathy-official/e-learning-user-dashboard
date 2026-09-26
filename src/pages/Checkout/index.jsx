@@ -48,6 +48,49 @@ export default function Checkout() {
       .finally(() => setLoading(false));
   }, [validId]);
 
+  // Complete purchase, authenticate user, and redirect
+  const completeSuccessfulCheckout = (userData, accessToken, refreshToken, orderRef) => {
+    if (setAuthSession) {
+      setAuthSession({
+        user: userData,
+        access: accessToken,
+        refresh: refreshToken,
+      });
+    } else {
+      if (accessToken) localStorage.setItem('access_token', accessToken);
+      if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+      if (userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+        if (updateUser) updateUser(userData);
+      }
+    }
+
+    const finalPrice = course?.discounted_price || 499;
+
+    // Record purchase in context state
+    addPurchase({
+      id: orderRef,
+      course_id: validId,
+      course_title: course?.title || 'Create & Sell Your First Digital Product With AI',
+      purchase_date: new Date().toISOString(),
+      amount: finalPrice,
+      status: 'paid',
+      payment_method: 'UPI / Online Instant',
+    });
+
+    // Update enrollment state
+    addEnrollment({
+      course_id: validId,
+      progress_percentage: 0,
+      completed_lessons: [],
+      last_watched_lesson: 'l1',
+      last_position_seconds: 0,
+    });
+
+    toast.success('Instant Access Granted! Welcome to the Masterclass! 🎉');
+    navigate(`/payment-success?course=${validId}&orderId=${orderRef}`);
+  };
+
   const handlePayment = async (e) => {
     if (e) e.preventDefault();
 
@@ -63,6 +106,9 @@ export default function Checkout() {
     }
 
     setPaying(true);
+
+    let poller = null;
+    let isFinished = false;
 
     try {
       // Save buyer profile in storage
@@ -82,7 +128,34 @@ export default function Checkout() {
         phone: buyerData.phone,
       });
 
-      // Step 2: Open payment modal
+      if (!order || !order.order_id) {
+        throw new Error('Failed to create payment order. Please try again.');
+      }
+
+      // Start background polling every 2.5 seconds to auto-detect payment completion
+      poller = setInterval(async () => {
+        if (isFinished) {
+          if (poller) clearInterval(poller);
+          return;
+        }
+        try {
+          const statusRes = await paymentService.getPaymentStatus(order.order_id);
+          if (statusRes && statusRes.status === 'paid' && !isFinished) {
+            isFinished = true;
+            if (poller) clearInterval(poller);
+            completeSuccessfulCheckout(
+              statusRes.user || buyerData,
+              statusRes.access,
+              statusRes.refresh,
+              order.order_id
+            );
+          }
+        } catch {
+          // Ignore background polling errors
+        }
+      }, 2500);
+
+      // Step 2: Open Razorpay modal
       const paymentResult = await paymentService.openRazorpay({
         key: order?.key,
         amount: order?.amount,
@@ -94,63 +167,62 @@ export default function Checkout() {
         theme: { color: '#06B6D4' },
       });
 
-      // Step 3: Verify payment server-side
-      const verification = await paymentService.verifyPayment({
-        razorpay_order_id: paymentResult.razorpay_order_id,
-        razorpay_payment_id: paymentResult.razorpay_payment_id,
-        razorpay_signature: paymentResult.razorpay_signature,
-        course_id: validId,
-      });
-
-      if (verification && verification.success) {
-        if (setAuthSession) {
-          setAuthSession({
-            user: verification.user,
-            access: verification.access,
-            refresh: verification.refresh,
-          });
-        } else {
-          if (verification.access) localStorage.setItem('access_token', verification.access);
-          if (verification.refresh) localStorage.setItem('refresh_token', verification.refresh);
-          if (verification.user) {
-            localStorage.setItem('user', JSON.stringify(verification.user));
-            if (updateUser) updateUser(verification.user);
+      // If user dismissed modal, check if payment succeeded in background
+      if (paymentResult?.dismissed) {
+        try {
+          const checkStatus = await paymentService.getPaymentStatus(order.order_id);
+          if (checkStatus && checkStatus.status === 'paid' && !isFinished) {
+            isFinished = true;
+            if (poller) clearInterval(poller);
+            completeSuccessfulCheckout(
+              checkStatus.user || buyerData,
+              checkStatus.access,
+              checkStatus.refresh,
+              order.order_id
+            );
+            return;
           }
+        } catch {}
+
+        if (!isFinished) {
+          if (poller) clearInterval(poller);
+          setPaying(false);
+          return;
         }
+      }
 
-        const orderRef = paymentResult.razorpay_order_id || `DP-${Date.now().toString().slice(-6)}`;
-        const finalPrice = course?.discounted_price || 499;
-
-        // Step 4: Record purchase in context state
-        addPurchase({
-          id: orderRef,
+      // Step 3: Verify payment signature server-side
+      if (paymentResult?.razorpay_payment_id && !isFinished) {
+        const verification = await paymentService.verifyPayment({
+          razorpay_order_id: paymentResult.razorpay_order_id,
+          razorpay_payment_id: paymentResult.razorpay_payment_id,
+          razorpay_signature: paymentResult.razorpay_signature,
           course_id: validId,
-          course_title: course?.title || 'Create & Sell Your First Digital Product With AI',
-          purchase_date: new Date().toISOString(),
-          amount: finalPrice,
-          status: 'paid',
-          payment_method: 'UPI / Online Instant',
         });
 
-        // Step 5: Update enrollment state
-        addEnrollment({
-          course_id: validId,
-          progress_percentage: 0,
-          completed_lessons: [],
-          last_watched_lesson: 'l1',
-          last_position_seconds: 0,
-        });
-
-        toast.success('Instant Access Granted! Welcome to the Masterclass! 🎉');
-        navigate(`/payment-success?course=${validId}&orderId=${orderRef}`);
-      } else {
-        throw new Error(verification?.error || 'Payment verification failed');
+        if (verification && verification.success && !isFinished) {
+          isFinished = true;
+          if (poller) clearInterval(poller);
+          completeSuccessfulCheckout(
+            verification.user || buyerData,
+            verification.access,
+            verification.refresh,
+            paymentResult.razorpay_order_id || order.order_id
+          );
+        } else if (!isFinished) {
+          throw new Error(verification?.error || 'Payment verification failed');
+        }
       }
     } catch (err) {
-      const errMsg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Payment could not be completed. Please try again.';
-      toast.error(errMsg);
+      if (!isFinished) {
+        const errMsg = err?.response?.data?.error || err?.response?.data?.detail || err?.message || 'Payment could not be completed. Please try again.';
+        toast.error(errMsg);
+      }
     } finally {
-      setPaying(false);
+      if (poller) clearInterval(poller);
+      if (!isFinished) {
+        setPaying(false);
+      }
     }
   };
 
