@@ -16,8 +16,7 @@ function LessonItem({ lesson, isActive, isEnrolled, onSelect }) {
         !canAccess ? styles.locked : '',
         lesson.is_completed ? styles.completed : '',
       ].filter(Boolean).join(' ')}
-      onClick={() => canAccess && onSelect(lesson)}
-      disabled={!canAccess}
+      onClick={() => onSelect && onSelect(lesson)}
       aria-label={`${lesson.title}${!canAccess ? ' (locked)' : ''}`}
       aria-current={isActive ? 'true' : undefined}
     >
@@ -56,8 +55,9 @@ function LessonItem({ lesson, isActive, isEnrolled, onSelect }) {
   );
 }
 
-export default function CurriculumSidebar({ modules = [], currentLessonId, isEnrolled = false, onLessonSelect }) {
+export default function CurriculumSidebar({ modules = [], currentLessonId, isEnrolled = false, onLessonSelect, onSelectLesson }) {
   const [expanded, setExpanded] = useState(() => modules.map((_, i) => i === 0));
+  const handleSelect = onLessonSelect || onSelectLesson;
 
   const toggleModule = (index) => {
     setExpanded((prev) => {
@@ -114,7 +114,7 @@ export default function CurriculumSidebar({ modules = [], currentLessonId, isEnr
                     lesson={lesson}
                     isActive={lesson.id === currentLessonId}
                     isEnrolled={isEnrolled}
-                    onSelect={onLessonSelect}
+                    onSelect={handleSelect}
                   />
                 ))}
               </div>

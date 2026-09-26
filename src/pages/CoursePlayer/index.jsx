@@ -61,7 +61,9 @@ export default function CoursePlayer() {
           return;
         }
 
-        // For protected lessons, check if user is authenticated and enrolled
+        // For protected lessons, set initial lesson and check if user is authenticated and enrolled
+        if (initial) setCurrentLesson(initial);
+
         if (!isAuthenticated) {
           setLoading(false);
           return;
@@ -78,7 +80,6 @@ export default function CoursePlayer() {
         }
 
         setAccessDenied(false);
-        if (initial) setCurrentLesson(initial);
       } catch {
         if (!isMounted) return;
         toast.error('Failed to load course details');
@@ -295,7 +296,9 @@ export default function CoursePlayer() {
               </div>
             ) : videoUrl ? (
               <VideoPlayer
+                videoUrl={videoUrl}
                 src={videoUrl}
+                lessonTitle={currentLesson?.title || course.title}
                 title={currentLesson?.title || course.title}
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={handleMarkComplete}
@@ -359,6 +362,8 @@ export default function CoursePlayer() {
           <CurriculumSidebar
             modules={enrichedModules}
             currentLessonId={currentLesson?.id}
+            isEnrolled={enrolled}
+            onLessonSelect={handleLessonSelect}
             onSelectLesson={handleLessonSelect}
             onClose={() => setSidebarOpen(false)}
           />

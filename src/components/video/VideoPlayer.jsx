@@ -9,7 +9,9 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './VideoPlayer.module.css';
 
-export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, onEnded, onTimeUpdate }) {
+export default function VideoPlayer({ videoUrl, src, lessonTitle, title, initialTime = 0, onEnded, onTimeUpdate }) {
+  const activeVideoUrl = videoUrl || src;
+  const activeTitle = lessonTitle || title;
   const videoRef = useRef(null);
   const { currentUser } = useAuth();
   const [playing, setPlaying] = useState(false);
@@ -27,7 +29,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, on
   // Reset initialTimeSet on videoUrl change
   useEffect(() => {
     initialTimeSet.current = false;
-  }, [videoUrl]);
+  }, [activeVideoUrl]);
 
   // Auto-hide controls after 3s of inactivity
   const resetControlsTimer = useCallback(() => {
@@ -159,7 +161,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, on
 
   const progressPercent = duration ? (currentTime / duration) * 100 : 0;
 
-  if (!videoUrl) {
+  if (!activeVideoUrl) {
     return (
       <div className={styles.placeholder}>
         <div className={styles.placeholderIcon}>
@@ -183,7 +185,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, on
       <video
         ref={videoRef}
         className={styles.video}
-        src={videoUrl}
+        src={activeVideoUrl}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
@@ -214,7 +216,7 @@ export default function VideoPlayer({ videoUrl, lessonTitle, initialTime = 0, on
       {/* Controls */}
       <div className={[styles.controls, showControls || !playing ? styles.visible : ''].join(' ')}>
         {/* Lesson title */}
-        {lessonTitle && <p className={styles.lessonTitle}>{lessonTitle}</p>}
+        {activeTitle && <p className={styles.lessonTitle}>{activeTitle}</p>}
 
         {/* Progress bar */}
         <div className={styles.progressArea}>
