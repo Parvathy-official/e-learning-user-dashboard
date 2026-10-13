@@ -17,7 +17,8 @@ export const MOCK_COURSES = [
     instructor_bio:
       'Digital entrepreneur & AI creator helping creators, professionals, and freelancers monetize their knowledge and launch profitable digital assets.',
     category: 'Digital Products & AI',
-    price: 2499,
+    price: 1999,
+    original_price: 1999,
     discounted_price: 499,
     rating: 4.98,
     total_ratings: 2840,

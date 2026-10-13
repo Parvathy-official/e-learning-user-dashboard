@@ -309,9 +309,9 @@ export default function Checkout() {
 
   if (!course) return null;
 
-  const discount = discountPercent(course.price, course.discounted_price || 499);
-  const final = course.discounted_price || 499;
-  const original = course.price || 2499;
+  const original = course.original_price || (course.price && course.price > (course.discounted_price || 499) ? course.price : 1999);
+  const final = course.discounted_price || (course.price && course.price < original ? course.price : 499);
+  const discount = discountPercent(original, final);
   const savings = original - final;
 
   return (

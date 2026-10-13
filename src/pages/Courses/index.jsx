@@ -92,8 +92,8 @@ export default function Courses() {
         <div className={styles.grid}>
           {filtered.map((course) => {
             const enrolled = isEnrolled(course.id);
-            const finalPrice = course.discounted_price || course.price || 499;
-            const originalPrice = course.original_price || course.price || 2499;
+            const finalPrice = course.discounted_price || (course.price && course.price < 1000 ? course.price : 499);
+            const originalPrice = course.original_price || (course.price && course.price > 1000 ? course.price : 1999);
 
             return (
               <div key={course.id} className={styles.courseCard}>

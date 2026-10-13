@@ -166,7 +166,8 @@ export default function Home() {
 
           {/* Main Titles */}
           <h1 className={styles.heroTitle}>
-            Create & Sell Your First Digital Product With AI
+            Create & Sell Your First Digital Product{' '}
+            <span className={styles.heroTitleAi}>With AI</span>
           </h1>
 
           {/* Banner Showcase Image */}
@@ -210,7 +211,7 @@ export default function Home() {
                 id="hero-resume-access-btn"
               >
                 <span>▶ OPEN MASTERCLASS PLAYER</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg className={styles.heroCtaArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
@@ -222,7 +223,7 @@ export default function Home() {
                 id="hero-get-access-btn"
               >
                 <span>GET INSTANT ACCESS</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg className={styles.heroCtaArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
@@ -870,13 +871,6 @@ export default function Home() {
               </h3>
               <p className={styles.pricingSessionBadge}>3-Hour Practical Session</p>
 
-              <div className={styles.pricingAmountWrap}>
-                <span className={styles.pricingCurrency}>₹</span>
-                <span className={styles.pricingAmount}>499</span>
-                <span className={styles.pricingOriginal}>₹2,499</span>
-              </div>
-              <span className={styles.pricingOneTime}>One-time payment • Lifetime Access</span>
-
               <div className={styles.pricingJourneyList}>
                 <p className={styles.journeyListLabel}>Learn the complete process from:</p>
                 <div className={styles.journeyPills}>
@@ -894,6 +888,22 @@ export default function Home() {
                   <span className={styles.pillSep}>→</span>
                   <span className={styles.pillEnd}>Sales</span>
                 </div>
+              </div>
+
+              {/* Limited-Period Offer Badge */}
+              <div className={styles.pricingOfferBadge}>
+                <span className={styles.pricingOfferBadgeFire}>🔥</span>
+                <span>LIMITED PERIOD OFFER</span>
+              </div>
+
+              {/* Price Row: ~~₹1,999~~ ₹499 — One-Time Payment */}
+              <div className={styles.pricingAmountWrap}>
+                <span className={styles.pricingOriginal}>₹1,999</span>
+                <div className={styles.pricingCurrentGroup}>
+                  <span className={styles.pricingCurrency}>₹</span>
+                  <span className={styles.pricingAmount}>499</span>
+                </div>
+                <span className={styles.pricingPriceLabel}>— One-Time Payment</span>
               </div>
 
               {userHasAccess ? (
@@ -915,8 +925,8 @@ export default function Home() {
                   onClick={handleInstantAccess}
                   id="pricing-buy-btn"
                 >
-                  <span>GET INSTANT ACCESS — ₹499</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <span>GET INSTANT ACCESS</span>
+                  <svg className={styles.pricingCtaArrow} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
                   </svg>
@@ -1073,12 +1083,22 @@ export default function Home() {
             <div className={styles.floatingInfo}>
               <div className={styles.floatingDot} />
               <div className={styles.floatingTextWrap}>
-                <span className={styles.floatingTitle}>
-                  Create & Sell Your First Digital Product With AI
-                </span>
-                <span className={styles.floatingMeta}>
-                  3-Hour Practical Session • <strong className={styles.floatingPrice}>₹499</strong>
-                </span>
+                <div className={styles.floatingTitleRow}>
+                  <span className={styles.floatingTitle}>
+                    Create & Sell Your First Digital Product With AI
+                  </span>
+                  <div className={styles.floatingOfferBadge}>
+                    <span className={styles.floatingOfferFire}>🔥</span>
+                    <span>LIMITED PERIOD OFFER</span>
+                  </div>
+                </div>
+                <div className={styles.floatingMeta}>
+                  <span className={styles.floatingSessionLabel}>3-Hour Practical Session • </span>
+                  <span className={styles.floatingPriceWrap}>
+                    <span className={styles.floatingOriginalPrice}>₹1,999</span>
+                    <strong className={styles.floatingPrice}>₹499</strong>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1089,7 +1109,7 @@ export default function Home() {
                 id="floating-resume-btn"
               >
                 <span>▶ Resume Masterclass</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg className={styles.floatingCtaArrow} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
@@ -1101,7 +1121,7 @@ export default function Home() {
                 id="floating-get-access-btn"
               >
                 <span>GET INSTANT ACCESS</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg className={styles.floatingCtaArrow} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
