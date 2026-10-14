@@ -23,9 +23,15 @@ export default function Dashboard() {
   }, [fetchEnrollments]);
 
   const enrolledCourses = MOCK_COURSES.filter((c) =>
-    enrollments.some((e) => e.course_id === c.id)
+    enrollments.some(
+      (e) =>
+        (String(e.course_id) === String(c.id) || String(e.course?.id) === String(c.id)) &&
+        (e.status ? ['active', 'completed'].includes(e.status.toLowerCase()) : true)
+    )
   );
-  const completed = enrollments.filter((e) => e.progress_percentage === 100).length;
+  const completed = enrollments.filter(
+    (e) => e.progress_percentage === 100 || e.status?.toLowerCase() === 'completed'
+  ).length;
   const inProgress = enrollments.filter((e) => e.progress_percentage > 0 && e.progress_percentage < 100).length;
   const progress = overallProgress(enrollments);
 

@@ -99,8 +99,9 @@ export function CourseProvider({ children }) {
     (courseId) =>
       enrollments.some(
         (e) =>
-          String(e.course_id) === String(courseId) ||
-          String(e.course?.id) === String(courseId)
+          (String(e.course_id) === String(courseId) ||
+          String(e.course?.id) === String(courseId)) &&
+          (e.status ? ['active', 'completed'].includes(e.status.toLowerCase()) : true)
       ),
     [enrollments]
   );
@@ -109,8 +110,9 @@ export function CourseProvider({ children }) {
     (courseId) =>
       enrollments.find(
         (e) =>
-          String(e.course_id) === String(courseId) ||
-          String(e.course?.id) === String(courseId)
+          (String(e.course_id) === String(courseId) ||
+          String(e.course?.id) === String(courseId)) &&
+          (e.status ? ['active', 'completed'].includes(e.status.toLowerCase()) : true)
       ) || null,
     [enrollments]
   );

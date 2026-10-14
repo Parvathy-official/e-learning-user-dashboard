@@ -29,7 +29,11 @@ export default function CoursePlayer() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const lastProgressSave = useRef(0);
 
-  const enrollment = enrollments.find((e) => String(e.course_id) === String(courseId));
+  const enrollment = enrollments.find(
+    (e) =>
+      (String(e.course_id) === String(courseId) || String(e.course?.id) === String(courseId)) &&
+      (e.status ? ['active', 'completed'].includes(e.status.toLowerCase()) : true)
+  );
   const completedLessons = enrollment?.completed_lessons || [];
   const enrolled = isEnrolled(courseId);
 
@@ -83,7 +87,11 @@ export default function CoursePlayer() {
           // Try refreshing enrollments once before denying
           if (fetchEnrollments) {
             const fresh = await fetchEnrollments().catch(() => []);
-            const isNowEnrolled = Array.isArray(fresh) && fresh.some((e) => String(e.course_id) === String(courseId) || String(e.course?.id) === String(courseId));
+            const isNowEnrolled = Array.isArray(fresh) && fresh.some(
+              (e) =>
+                (String(e.course_id) === String(courseId) || String(e.course?.id) === String(courseId)) &&
+                (e.status ? ['active', 'completed'].includes(e.status.toLowerCase()) : true)
+            );
             if (isNowEnrolled) {
               setAccessDenied(false);
               setLoading(false);

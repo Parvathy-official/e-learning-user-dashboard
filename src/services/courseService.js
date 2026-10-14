@@ -59,7 +59,10 @@ const courseService = {
   async checkCourseAccess(courseId) {
     if (USE_MOCK) {
       await delay(300);
-      const enrollment = MOCK_ENROLLMENTS.find((e) => e.course_id === courseId);
+      const enrollment = MOCK_ENROLLMENTS.find(
+        (e) => String(e.course_id) === String(courseId) &&
+               (!e.status || ['active', 'completed'].includes(e.status.toLowerCase()))
+      );
       return { has_access: !!enrollment, enrollment: enrollment || null };
     }
     const { data } = await api.get(`/courses/${courseId}/access/`);
